@@ -21,7 +21,7 @@ bitmex_api_secret = "NHtP7ZyhkjgylTtB5-AsPxlVJ7tngw64JYYzs3JZw_1qvuot" #Enter yo
 binance_api_key = '[REDACTED]'    #Enter your own API-key here
 binance_api_secret = '[REDACTED]' #Enter your own API-secret here
 
-### CONSTANTSx
+### CONSTANTS
 binsizes = {"1m": 1, "5m": 5, "1h": 60, "1d": 1440}
 batch_size = 750
 bitmex_client = bitmex(test=False, api_key=bitmex_api_key, api_secret=bitmex_api_secret)
@@ -34,7 +34,7 @@ def minutes_of_new_data(symbol, kline_size, data, source):
     if len(data) > 0:  old = parser.parse(data["timestamp"].iloc[-1])
     # elif source == "binance": old = datetime.strptime('1 Jan 2017', '%d %b %Y')
     new = bitmex_client.Trade.Trade_getBucketed(symbol=symbol, binSize=kline_size, count=1, reverse=True).result()[0][0]['timestamp']
-    old = new - timedelta(minutes=45)
+    old = new - timedelta(minutes=120)
     # if source == "binance": new = pd.to_datetime(binance_client.get_klines(symbol=symbol, interval=kline_size)[-1][0], unit='ms')
     # if source == "bitmex": new = bitmex_client.Trade.Trade_getBucketed(symbol=symbol, binSize=kline_size, count=1, reverse=True).result()[0][0]['timestamp']
     return old, new
@@ -65,6 +65,7 @@ def get_all_bitmex(symbol, kline_size, save = False):
             time.sleep(1)
             new_time = (oldest_point + timedelta(minutes = round_num * batch_size * binsizes[kline_size]))
             data = bitmex_client.Trade.Trade_getBucketed(symbol=symbol, binSize=kline_size, count=batch_size, startTime = new_time).result()[0]
+
             temp_df = pd.DataFrame(data)
             data_df = data_df.append(temp_df)
     # data_df.set_index('timestamp', inplace=True)

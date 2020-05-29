@@ -10,8 +10,8 @@ BASE_URL = "https://testnet.bitmex.com/api/v1/"
 # BASE_URL = "https://www.bitmex.com/api/v1/" # Once you're ready, uncomment this.
 
 # The BitMEX API requires permanent API keys. Go to https://testnet.bitmex.com/app/apiKeys to fill these out.
-API_KEY = ""
-API_SECRET = ""
+API_KEY = "OlgTMcg1SRrvJgQhy7yymK-0"
+API_SECRET = "sK4AmTmeF4mOIdu43zA9JVdybBHcOET8xNgymRrdn7CAl2lD"
 
 ########################################################################################################################
 # Target
@@ -26,19 +26,19 @@ SYMBOL = "XBTUSD"
 ########################################################################################################################
 
 # How many pairs of buy/sell orders to keep open
-ORDER_PAIRS = 6
+ORDER_PAIRS = 5
 
 # ORDER_START_SIZE will be the number of contracts submitted on level 1
 # Number of contracts from level 1 to ORDER_PAIRS - 1 will follow the function
 # [ORDER_START_SIZE + ORDER_STEP_SIZE (Level -1)]
-ORDER_START_SIZE = 100
-ORDER_STEP_SIZE = 100
+ORDER_START_SIZE = 25
+ORDER_STEP_SIZE = 15
 
 # Distance between successive orders, as a percentage (example: 0.005 for 0.5%)
-INTERVAL = 0.005
+INTERVAL = 0.0001
 
 # Minimum spread to maintain, in percent, between asks & bids
-MIN_SPREAD = 0.01
+MIN_SPREAD = 0.0015
 
 # If True, market-maker will place orders just inside the existing spread and work the interval % outwards,
 # rather than starting in the middle and killing potentially profitable spreads.
@@ -54,7 +54,7 @@ MAINTAIN_SPREADS = True
 # it will be resubmitted.
 #
 # 0.01 == 1%
-RELIST_INTERVAL = 0.01
+RELIST_INTERVAL = 0.00035
 
 
 ########################################################################################################################
@@ -71,7 +71,7 @@ MAX_POSITION = 10000
 # Use to guarantee a maker rebate.
 # However -- orders that would have matched immediately will instead cancel, and you may end up with
 # unexpected delta. Be careful.
-POST_ONLY = False
+POST_ONLY = True
 
 ########################################################################################################################
 # Misc Behavior, Technicals
@@ -79,7 +79,7 @@ POST_ONLY = False
 
 # If true, don't set up any orders, just say what we would do
 # DRY_RUN = True
-DRY_RUN = True
+DRY_RUN = False
 
 # How often to re-check and replace orders.
 # Generally, it's safe to make this short because we're fetching from websockets. But if too many

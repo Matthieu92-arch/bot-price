@@ -15,6 +15,9 @@ from market_maker.utils import log, constants, errors, math
 
 # Used for reloading the bot - saves modified times of key files
 import os
+
+from tools_bitmex import reajust_qty, reajust_price
+
 watched_files_mtimes = [(f, getmtime(f)) for f in settings.WATCHED_FILES]
 
 
@@ -268,8 +271,8 @@ class OrderManager:
 
         # Back off if our spread is too small.
         if self.start_position_buy * (1.00 + settings.MIN_SPREAD) > self.start_position_sell:
-            self.start_position_buy *= (1.00 - (settings.MIN_SPREAD / 2))
-            self.start_position_sell *= (1.00 + (settings.MIN_SPREAD / 2))
+            self.start_position_buy *= (1.00 - (settings.MIN_SPREAD / 6))
+            self.start_position_sell *= (1.00 + (settings.MIN_SPREAD / 6))
 
         # Midpoint, used for simpler order placement.
         self.start_position_mid = ticker["mid"]
@@ -302,6 +305,10 @@ class OrderManager:
             if index < 0 and start_position > self.start_position_sell:
                 start_position = self.start_position_buy
 
+
+        interval = settings.INTERVAL
+        if (self.running_qty > 750 and index > 0) or (self.running_qty < -750 and index < 0):
+            interval += 0.0006
         return math.toNearest(start_position * (1 + settings.INTERVAL) ** index, self.instrument['tickSize'])
 
     ###
@@ -327,21 +334,33 @@ class OrderManager:
 
     def prepare_order(self, index):
         """Create an order object."""
+        position = self.exchange.get_position()
+        self.running_qty = self.exchange.get_delta()
+        side = "Buy" if index < 0 else "Sell"
 
         if settings.RANDOM_ORDER_SIZE is True:
             quantity = random.randint(settings.MIN_ORDER_SIZE, settings.MAX_ORDER_SIZE)
         else:
             quantity = settings.ORDER_START_SIZE + ((abs(index) - 1) * settings.ORDER_STEP_SIZE)
 
+
+        # INUTILE JE PENSE
+        if self.running_qty > 200 and side == "Buy":
+            quantity /= 10
+        elif self.running_qty < -200 and side == "Sell":
+            quantity /= 10
+
+        quantity = quantity if quantity > 25 else 25
         price = self.get_price_offset(index)
 
-        return {'price': price, 'orderQty': quantity, 'side': "Buy" if index < 0 else "Sell"}
+        return {'price': reajust_price(position['avgEntryPrice'], price, side, self.running_qty), 'orderQty': reajust_qty(self.running_qty, quantity, side), 'side': "Buy" if index < 0 else "Sell"}
 
     def converge_orders(self, buy_orders, sell_orders):
         """Converge the orders we currently have in the book with what we want to be in the book.
            This involves amending any open orders and creating new ones if any have filled completely.
            We start from the closest orders outward."""
 
+        position = self.exchange.get_position()
         tickLog = self.exchange.get_instrument()['tickLog']
         to_amend = []
         to_create = []
@@ -366,8 +385,10 @@ class OrderManager:
                         # If price has changed, and the change is more than our RELIST_INTERVAL, amend.
                         desired_order['price'] != order['price'] and
                         abs((desired_order['price'] / order['price']) - 1) > settings.RELIST_INTERVAL):
-                    to_amend.append({'orderID': order['orderID'], 'orderQty': order['cumQty'] + desired_order['orderQty'],
-                                     'price': desired_order['price'], 'side': order['side']})
+                    to_amend.append({'orderID': order['orderID'], 'orderQty': reajust_qty(self.running_qty, order['cumQty'] + desired_order['orderQty'], order['side']),
+                                     'price': reajust_price(position['avgEntryPrice'], desired_order['price'], order['side'], self.running_qty), 'side': order['side']})
+                    # to_amend.append({'orderID': order['orderID'], 'orderQty': order['cumQty'] + desired_order['orderQty'],
+                    #                  'price': desired_order['price'], 'side': order['side']})
             except IndexError:
                 # Will throw if there isn't a desired order to match. In that case, cancel it.
                 to_cancel.append(order)
