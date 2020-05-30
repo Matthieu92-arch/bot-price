@@ -38,8 +38,6 @@ def reajust_qty(position, quantity, side):
         quantity += 60
     if (position > 1000 and side == "Sell") or (position < -1000 and side == "Buy"):
         quantity += 80
-    if (position > 1400 and side == "Sell") or (position < -1400 and side == "Buy"):
-        quantity += 40
 
     return quantity
 
