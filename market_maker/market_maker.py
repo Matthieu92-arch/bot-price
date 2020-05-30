@@ -345,9 +345,9 @@ class OrderManager:
 
 
         # INUTILE JE PENSE
-        if self.running_qty > 200 and side == "Buy":
+        if self.running_qty > 400 and side == "Buy":
             quantity /= 10
-        elif self.running_qty < -200 and side == "Sell":
+        elif self.running_qty < -400 and side == "Sell":
             quantity /= 10
 
         quantity = quantity if quantity > 50 else 50
