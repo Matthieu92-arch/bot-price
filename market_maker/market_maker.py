@@ -350,7 +350,7 @@ class OrderManager:
         elif self.running_qty < -200 and side == "Sell":
             quantity /= 10
 
-        quantity = quantity if quantity > 25 else 25
+        quantity = quantity if quantity > 50 else 50
         price = self.get_price_offset(index)
 
         return {'price': reajust_price(position['avgEntryPrice'], price, side, self.running_qty), 'orderQty': reajust_qty(self.running_qty, quantity, side), 'side': "Buy" if index < 0 else "Sell"}
