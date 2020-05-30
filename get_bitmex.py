@@ -70,7 +70,7 @@ def get_all_bitmex(symbol, kline_size, save = False):
             data_df = data_df.append(temp_df)
     # data_df.set_index('timestamp', inplace=True)
     if save and rounds > 0: data_df.to_csv(filename)
-    get_mean_open_close(data_df)
+    # get_mean_open_close(data_df)
     print('Data_df tendance')
     print(data_df.close.mean() - data_df.open.mean())
     print('All caught up..!')
