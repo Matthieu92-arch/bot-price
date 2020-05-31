@@ -3,6 +3,9 @@ from pandas import np
 from finta import TA
 import matplotlib.pyplot as plt
 
+import settings
+
+
 def get_mean_open_close(data_df):
     link = "https://www.bitmex.com/api/v1/trade?symbol=.BXBT&count=120&columns=price&reverse=true"
     f = requests.get(link)
@@ -62,7 +65,7 @@ def get_mean_open_close(data_df):
 
 def reajust_qty(position, quantity, side, index):
     if (position > 300 and side == "Sell") or (position < -300 and side == "Buy"):
-        quantity += 35
+        quantity += settings.ORDER_BALANCE_STEP_SIZE
     if (position > 500 and side == "Sell") or (position < -500 and side == "Buy"):
         quantity = round((position * - 1) / 5)
 

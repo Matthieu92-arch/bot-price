@@ -309,8 +309,8 @@ class OrderManager:
 
 
         interval = settings.INTERVAL
-        if (self.running_qty > 750 and index > 0) or (self.running_qty < -750 and index > 0):
-            interval += 0.0004
+        if (self.running_qty > 600 and index > 0) or (self.running_qty < -600 and index > 0):
+            interval = settings.INTERVAL_BALANCE
         return math.toNearest(start_position * (1 + interval) ** index, self.instrument['tickSize'])
 
     ###
