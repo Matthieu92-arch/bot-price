@@ -248,8 +248,8 @@ class BitMEX(object):
 
         def retry():
             self.retries += 1
-            if self.retries > 10000:
-                raise Exception("Max retries on %s (%s) hit, raising." % (path, json.dumps(postdict or '')))
+            # if self.retries > 10000:
+            #     raise Exception("Max retries on %s (%s) hit, raising." % (path, json.dumps(postdict or '')))
             return self._curl_bitmex(path, query, postdict, timeout, verb, rethrow_errors, max_retries)
 
         # Make the request
