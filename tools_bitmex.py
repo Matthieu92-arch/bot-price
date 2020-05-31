@@ -50,7 +50,7 @@ def reajust_qty(position, quantity, side, index):
     if (position > 700 and side == "Sell") or (position < -700 and side == "Buy"):
         quantity += 75
     if (position > 1000 and side == "Sell") or (position < -1000 and side == "Buy"):
-        quantity = round((position * - 1) / 5) + ((index * -1) * 15)
+        quantity = round((position * - 1) / 5)
 
     return quantity
 
