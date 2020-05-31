@@ -350,7 +350,7 @@ class OrderManager:
         if (self.running_qty > 400 and side == "Buy") or (self.running_qty < -400 and side == "Sell"):
             quantity /= 10
 
-        quantity = quantity if quantity > 50 else 39
+        quantity = quantity if quantity > 50 else settings.ORDER_START_SIZE
 
         price = self.get_price_offset(index)
         price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
