@@ -532,15 +532,6 @@ class OrderManager:
         # e = get_all_bitmex('XBTUSD', '1m')
         # print(e)
         while True:
-            data_ticker = self.exchange.bitmex.ticker_data()
-            if data_ticker != previous:
-                previous = data_ticker
-                logger.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-                logger.info('ticker_data')
-                logger.info(data_ticker)
-            # logger.info('market_depth')
-            # logger.info(self.exchange.bitmex.market_depth('XBTUSD'))
-            # logger.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
 
             sys.stdout.write("-----\n")
             sys.stdout.flush()
