@@ -222,6 +222,8 @@ class OrderManager:
         self.starting_qty = self.exchange.get_delta()
         self.running_qty = self.starting_qty
         self.reset()
+        self.balanced = True
+        self.previous_qty = 0
 
     def reset(self):
         self.exchange.cancel_all_orders()
@@ -307,7 +309,7 @@ class OrderManager:
 
 
         interval = settings.INTERVAL
-        if (self.running_qty < 750 and index > 0) or (self.running_qty < -750 and index > 0):
+        if (self.running_qty > 750 and index > 0) or (self.running_qty < -750 and index > 0):
             interval += 0.0004
         return math.toNearest(start_position * (1 + interval) ** index, self.instrument['tickSize'])
 
@@ -389,7 +391,8 @@ class OrderManager:
                 if desired_order['orderQty'] != order['leavesQty'] or (
                         # If price has changed, and the change is more than our RELIST_INTERVAL, amend.
                         desired_order['price'] != order['price'] and
-                        abs((desired_order['price'] / order['price']) - 1) > settings.RELIST_INTERVAL):
+                        abs((desired_order['price'] / order['price']) - 1) > settings.RELIST_INTERVAL) or (not self.balanced):
+                    self.balanced = True
                     to_amend.append({'orderID': order['orderID'], 'orderQty': reajust_qty(self.running_qty, order['cumQty'] + desired_order['orderQty'], order['side'], cpt / 2),
                                      'price': reajust_price(position['avgEntryPrice'], desired_order['price'], order['side'], self.running_qty, cpt / 2), 'side': order['side']})
                     # to_amend.append({'orderID': order['orderID'], 'orderQty': order['cumQty'] + desired_order['orderQty'],
@@ -550,6 +553,10 @@ class OrderManager:
             if not self.check_connection():
                 logger.error("Realtime data connection unexpectedly closed, restarting.")
                 self.restart()
+
+            if (self.previous_qty > 700 or self.previous_qty < -700) and (
+                    self.running_qty < 700 or self.running_qty > -700):
+                self.balanced = False
 
             self.sanity_check()  # Ensures health of mm - several cut-out points here
             self.print_status()  # Print skew, delta, etc
