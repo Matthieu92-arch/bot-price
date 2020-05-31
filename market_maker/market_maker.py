@@ -529,8 +529,8 @@ class OrderManager:
     def run_loop(self):
         data_ticker = {}
         previous = {}
-        e = get_all_bitmex('XBTUSD', '1m')
-        print(e)
+        # e = get_all_bitmex('XBTUSD', '1m')
+        # print(e)
         while True:
             data_ticker = self.exchange.bitmex.ticker_data()
             if data_ticker != previous:
