@@ -307,9 +307,9 @@ class OrderManager:
 
 
         interval = settings.INTERVAL
-        if (self.running_qty > 750 and index > 0) or (self.running_qty < -750 and index < 0):
-            interval += 0.0006
-        return math.toNearest(start_position * (1 + settings.INTERVAL) ** index, self.instrument['tickSize'])
+        if (self.running_qty < 750 and index > 0) or (self.running_qty < -750 and index > 0):
+            interval += 0.0004
+        return math.toNearest(start_position * (1 + interval) ** index, self.instrument['tickSize'])
 
     ###
     # Orders
@@ -351,9 +351,12 @@ class OrderManager:
             quantity /= 10
 
         quantity = quantity if quantity > 50 else 25
-        price = self.get_price_offset(index)
 
-        return {'price': reajust_price(position['avgEntryPrice'], price, side, self.running_qty), 'orderQty': reajust_qty(self.running_qty, quantity, side), 'side': "Buy" if index < 0 else "Sell"}
+        price = self.get_price_offset(index)
+        price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
+        quantity = reajust_qty(self.running_qty, quantity, side, index)
+
+        return {'price': price, 'orderQty': quantity, 'side': "Buy" if index < 0 else "Sell"}
 
     def converge_orders(self, buy_orders, sell_orders):
         """Converge the orders we currently have in the book with what we want to be in the book.
@@ -367,11 +370,13 @@ class OrderManager:
         to_cancel = []
         buys_matched = 0
         sells_matched = 0
+        cpt = 0
         existing_orders = self.exchange.get_orders()
 
         # Check all existing orders and match them up with what we want to place.
         # If there's an open one, we might be able to amend it to fit what we want.
         for order in existing_orders:
+            cpt += 1
             try:
                 if order['side'] == 'Buy':
                     desired_order = buy_orders[buys_matched]
@@ -385,8 +390,8 @@ class OrderManager:
                         # If price has changed, and the change is more than our RELIST_INTERVAL, amend.
                         desired_order['price'] != order['price'] and
                         abs((desired_order['price'] / order['price']) - 1) > settings.RELIST_INTERVAL):
-                    to_amend.append({'orderID': order['orderID'], 'orderQty': reajust_qty(self.running_qty, order['cumQty'] + desired_order['orderQty'], order['side']),
-                                     'price': reajust_price(position['avgEntryPrice'], desired_order['price'], order['side'], self.running_qty), 'side': order['side']})
+                    to_amend.append({'orderID': order['orderID'], 'orderQty': reajust_qty(self.running_qty, order['cumQty'] + desired_order['orderQty'], order['side'], cpt / 2),
+                                     'price': reajust_price(position['avgEntryPrice'], desired_order['price'], order['side'], self.running_qty, cpt / 2), 'side': order['side']})
                     # to_amend.append({'orderID': order['orderID'], 'orderQty': order['cumQty'] + desired_order['orderQty'],
                     #                  'price': desired_order['price'], 'side': order['side']})
             except IndexError:
