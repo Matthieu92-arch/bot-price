@@ -29,6 +29,9 @@ def get_mean_open_close(data_df):
     return price
 
 
+##          VERSION 1
+## -----------------------------
+
 # def reajust_qty(position, quantity, side):
 #     if (position > 300 and side == "Sell") or (position < -300 and side == "Buy"):
 #         quantity += 25
@@ -42,14 +45,25 @@ def get_mean_open_close(data_df):
 #     return quantity
 
 
+##          VERSION 2
+## -----------------------------
+# def reajust_qty(position, quantity, side, index):
+#     if (position > 300 and side == "Sell") or (position < -300 and side == "Buy"):
+#         quantity += 35
+#     if (position > 500 and side == "Sell") or (position < -500 and side == "Buy"):
+#         quantity += 50
+#     if (position > 700 and side == "Sell") or (position < -700 and side == "Buy"):
+#         quantity += 75
+#     if (position > 1000 and side == "Sell") or (position < -1000 and side == "Buy"):
+#         quantity = round((position * - 1) / 5)
+#
+#     return quantity
+
+
 def reajust_qty(position, quantity, side, index):
     if (position > 300 and side == "Sell") or (position < -300 and side == "Buy"):
         quantity += 35
     if (position > 500 and side == "Sell") or (position < -500 and side == "Buy"):
-        quantity += 50
-    if (position > 700 and side == "Sell") or (position < -700 and side == "Buy"):
-        quantity += 75
-    if (position > 1000 and side == "Sell") or (position < -1000 and side == "Buy"):
         quantity = round((position * - 1) / 5)
 
     return quantity
