@@ -347,12 +347,10 @@ class OrderManager:
 
 
         # INUTILE JE PENSE
-        if self.running_qty > 400 and side == "Buy":
-            quantity /= 10
-        elif self.running_qty < -400 and side == "Sell":
+        if (self.running_qty > 400 and side == "Buy") or (self.running_qty < -400 and side == "Sell"):
             quantity /= 10
 
-        quantity = quantity if quantity > 50 else 25
+        quantity = quantity if quantity > 50 else 39
 
         price = self.get_price_offset(index)
         price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
