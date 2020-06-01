@@ -106,9 +106,9 @@ def reajust_price(entry_price, desired_price, side, quantity, index):
         return round(desired_price - (index))
 
 
-    if side == 'Buy' and desired_price < entry_price:
+    if side == 'Buy' and desired_price > entry_price:
         return round(entry_price - (index * 0.5))
-    elif side == 'Sell' and desired_price > entry_price:
+    elif side == 'Sell' and desired_price < entry_price:
         return round(entry_price + (index * 0.5))
 
     return round(desired_price)
