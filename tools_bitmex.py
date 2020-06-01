@@ -80,9 +80,9 @@ def reajust_price(entry_price, desired_price, side, quantity, index):
 
     ### Rapprocher ordres de entry_price si position commence à grandir
     if side == 'Buy' and desired_price > entry_price and quantity < -700:
-        return round(((entry_price * 2) / 2) - 0.5 - (index * 0.5))
+        return round(((entry_price * 2) / 2) - 0.5 - (index))
     elif side == 'Sell' and desired_price < entry_price and quantity > 700:
-        return round(((entry_price * 2) / 2) + 0.5 + (index * 0.5))
+        return round(((entry_price * 2) / 2) + 0.5 + (index))
 
 
     ### Rapprocher prix de l'entry price si possible de close possition de suite
