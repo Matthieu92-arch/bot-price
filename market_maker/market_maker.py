@@ -347,7 +347,7 @@ class OrderManager:
 
 
         # INUTILE JE PENSE
-        if (self.running_qty > 400 and side == "Buy") or (self.running_qty < -400 and side == "Sell"):
+        if (self.running_qty > 750 and side == "Buy") or (self.running_qty < -750 and side == "Sell"):
             quantity /= 10
 
         quantity = quantity if quantity > 50 else settings.ORDER_START_SIZE
