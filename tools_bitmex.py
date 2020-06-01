@@ -85,7 +85,7 @@ def reajust_price(entry_price, desired_price, side, quantity, index):
         return round(((entry_price * 2) / 2) + 0.5 + (index))
 
 
-    ### Rapprocher prix de l'entry price si possible de close possition de suite
+    ### Rapprocher prix de l'entry price si possible de close position de suite
     ### Baisse de gains mais safe
     if side == 'Buy' and desired_price < entry_price and quantity < -350:
         return round(((entry_price * 2) / 2) - 0.5 - (index * 1))
@@ -104,5 +104,11 @@ def reajust_price(entry_price, desired_price, side, quantity, index):
         return round(desired_price + (index))
     elif quantity > 750 and side == "Buy":
         return round(desired_price - (index))
+
+
+    if side == 'Buy' and desired_price < entry_price:
+        return round(entry_price - (index * 0.5))
+    elif side == 'Sell' and desired_price > entry_price:
+        return round(entry_price + (index * 0.5))
 
     return round(desired_price)
