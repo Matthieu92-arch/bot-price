@@ -8,7 +8,7 @@ import requests
 import atexit
 import signal
 
-from get_bitmex import get_all_bitmex
+from get_bitmex import get_all_bitmex, get_mean_open_close
 from market_maker import bitmex
 from market_maker.settings import settings
 from market_maker.utils import log, constants, errors, math
@@ -16,7 +16,7 @@ from market_maker.utils import log, constants, errors, math
 # Used for reloading the bot - saves modified times of key files
 import os
 
-from tools_bitmex import reajust_qty, reajust_price
+from tools_bitmex import reajust_qty, reajust_price, get_price, clean_prices
 
 watched_files_mtimes = [(f, getmtime(f)) for f in settings.WATCHED_FILES]
 
@@ -222,11 +222,14 @@ class OrderManager:
         self.starting_qty = self.exchange.get_delta()
         self.running_qty = self.starting_qty
         self.reset()
-        self.balanced = True
+        self.wallet = None
         self.previous_qty = 0
+        self.bb = None
 
     def reset(self):
         self.exchange.cancel_all_orders()
+        self.wallet = self.exchange.bitmex.funds()
+        self.wallet = (self.wallet['walletBalance'] * 100) / self.wallet['marginBalance']
         self.sanity_check()
         self.print_status()
 
@@ -326,37 +329,79 @@ class OrderManager:
         # then we match orders from the outside in, ensuring the fewest number of orders are amended and only
         # a new order is created in the inside. If we did it inside-out, all orders would be amended
         # down and a new order would be created at the outside.
+
+
+        ##              CALCULER PRIX EN AVANCE ICI
+        # self.wallet = 70
+        # self.running_qty = -1
+
+        if self.wallet >= 75:
+            self.bb = get_mean_open_close(20, '1m')
+        elif self.wallet >= 60:
+            self.bb = get_mean_open_close(20, '5m')
+        elif self.wallet >= 45:
+            self.bb = get_mean_open_close(20, '5m')
+        else:
+            self.bb = get_mean_open_close(20, '5m')
+        last_price = self.exchange.bitmex.ws.get_ticker('XBTUSD')['last']
+
+        prices_up, prices_down = get_price(self.wallet, self.bb, self.running_qty, last_price)
+        prices_up, prices_down = clean_prices(prices_up, prices_down)
+
         for i in reversed(range(1, settings.ORDER_PAIRS + 1)):
             if not self.long_position_limit_exceeded():
-                buy_orders.append(self.prepare_order(-i))
+                buy_orders.append(self.prepare_order(-i, prices_down[i], 'Buy'))
             if not self.short_position_limit_exceeded():
-                sell_orders.append(self.prepare_order(i))
+                sell_orders.append(self.prepare_order(i, prices_up[i], 'Sell'))
 
         return self.converge_orders(buy_orders, sell_orders)
 
-    def prepare_order(self, index):
+
+    #
+    #   SAVE fucntion
+    #
+    # def prepare_order(self, index):
+    #     """Create an order object."""
+    #     position = self.exchange.get_position()
+    #     self.running_qty = self.exchange.get_delta()
+    #     side = "Buy" if index < 0 else "Sell"
+    #
+    #     if settings.RANDOM_ORDER_SIZE is True:
+    #         quantity = random.randint(settings.MIN_ORDER_SIZE, settings.MAX_ORDER_SIZE)
+    #     else:
+    #         quantity = settings.ORDER_START_SIZE + ((abs(index) - 1) * settings.ORDER_STEP_SIZE)
+    #
+    #
+    #     # INUTILE JE PENSE
+    #     if (self.running_qty > 750 and side == "Buy") or (self.running_qty < -750 and side == "Sell"):
+    #         quantity /= 10
+    #
+    #     quantity = quantity if quantity > 50 else settings.ORDER_START_SIZE
+    #
+    #     price = self.get_price_offset(index)
+    #     price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
+    #     quantity = reajust_qty(self.running_qty, quantity, side, index)
+    #
+    #     return {'price': price, 'orderQty': quantity, 'side': "Buy" if index < 0 else "Sell"}
+
+
+    def prepare_order(self, index, price, side):
         """Create an order object."""
         position = self.exchange.get_position()
         self.running_qty = self.exchange.get_delta()
-        side = "Buy" if index < 0 else "Sell"
+        # side = "Buy" if index < 0 else "Sell"
 
         if settings.RANDOM_ORDER_SIZE is True:
             quantity = random.randint(settings.MIN_ORDER_SIZE, settings.MAX_ORDER_SIZE)
         else:
             quantity = settings.ORDER_START_SIZE + ((abs(index) - 1) * settings.ORDER_STEP_SIZE)
 
-
-        # INUTILE JE PENSE
-        if (self.running_qty > 750 and side == "Buy") or (self.running_qty < -750 and side == "Sell"):
-            quantity /= 10
-
-        quantity = quantity if quantity > 50 else settings.ORDER_START_SIZE
-
-        price = self.get_price_offset(index)
-        price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
+        # price = self.get_price_offset(index)
+        # price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
         quantity = reajust_qty(self.running_qty, quantity, side, index)
 
         return {'price': price, 'orderQty': quantity, 'side': "Buy" if index < 0 else "Sell"}
+
 
     def converge_orders(self, buy_orders, sell_orders):
         """Converge the orders we currently have in the book with what we want to be in the book.
@@ -389,8 +434,7 @@ class OrderManager:
                 if desired_order['orderQty'] != order['leavesQty'] or (
                         # If price has changed, and the change is more than our RELIST_INTERVAL, amend.
                         desired_order['price'] != order['price'] and
-                        abs((desired_order['price'] / order['price']) - 1) > settings.RELIST_INTERVAL) or (not self.balanced):
-                    self.balanced = True
+                        abs((desired_order['price'] / order['price']) - 1) > settings.RELIST_INTERVAL):
                     to_amend.append({'orderID': order['orderID'], 'orderQty': reajust_qty(self.running_qty, order['cumQty'] + desired_order['orderQty'], order['side'], cpt / 2),
                                      'price': reajust_price(position['avgEntryPrice'], desired_order['price'], order['side'], self.running_qty, cpt / 2), 'side': order['side']})
                     # to_amend.append({'orderID': order['orderID'], 'orderQty': order['cumQty'] + desired_order['orderQty'],
@@ -536,6 +580,8 @@ class OrderManager:
 
             self.check_file_change()
             sleep(settings.LOOP_INTERVAL)
+            self.wallet = self.exchange.bitmex.funds()
+            self.wallet = (self.wallet['walletBalance'] * 100) / self.wallet['marginBalance']
 
             # This will restart on very short downtime, but if it's longer,
             # the MM will crash entirely as it is unable to connect to the WS on boot.
@@ -543,10 +589,7 @@ class OrderManager:
                 logger.error("Realtime data connection unexpectedly closed, restarting.")
                 self.restart()
 
-            if (self.previous_qty > 700 or self.previous_qty < -700) and (
-                    self.running_qty < 700 or self.running_qty > -700):
-                self.balanced = False
-
+            # self.bb = get_mean_open_close(80, '1m')
             self.sanity_check()  # Ensures health of mm - several cut-out points here
             self.print_status()  # Print skew, delta, etc
             self.place_orders()  # Creates desired orders and converges to existing orders

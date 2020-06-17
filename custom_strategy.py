@@ -9,6 +9,7 @@ import settings
 import tulipy as ti
 import matplotlib.pyplot as plt
 import market_maker._settings_base as baseSettings
+from get_bitmex import get_all_bitmex, get_mean_open_close
 
 from market_maker import bitmex
 from market_maker.market_maker import OrderManager
@@ -45,7 +46,9 @@ class CustomOrderManager(OrderManager):
 
 
     def run(self) -> None:
-        link = "https://www.bitmex.com/api/v1/trade?symbol=.BXBT&count=200&columns=price&reverse=true"
+        number = 240
+        link = "https://www.bitmex.com/api/v1/trade?symbol=.BXBT&count=" + \
+               str(number) + "&columns=price&reverse=true"
         f = requests.get(link)
         prices = []
         for x in f.json():
@@ -54,15 +57,20 @@ class CustomOrderManager(OrderManager):
         print(prices)
         prices.reverse()
         DATA = np.array(prices)
-        bbands = ti.bbands(DATA, period=5, stddev=2)
-        high = bbands[0]
-        middle = bbands[1]
-        low = bbands[2]
+        # bbands = ti.bbands(DATA, period=5, stddev=2)
+        # res = TA.BBANDS(get_all_bitmex('XBTUSD', '1m', False, nb=number))
+        # high = bbands[0]
+        # middle = bbands[1]
+        # low = bbands[2]
+        # low = list(res.BB_LOWER[120:])
+        # middle = list(res.BB_MIDDLE[120:])
+        # high = list(res.BB_UPPER[120:])
+        # plt.plot(prices, color='red')
         # plt.plot(high, color='orange')
-        # plt.plot(prices, color='g')
+        # plt.plot(middle, color='g')
         # plt.plot(low, color='yellow')
         # plt.show()
-
+        # get_mean_open_close(80, '1m')
         order_manager = OrderManager()
 
         # Try/except just keeps ctrl-c from printing an ugly stacktrace

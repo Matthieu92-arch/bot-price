@@ -4,33 +4,179 @@ from finta import TA
 import matplotlib.pyplot as plt
 
 import settings
+from get_bitmex import get_all_bitmex
 
 
-def get_mean_open_close(data_df):
-    link = "https://www.bitmex.com/api/v1/trade?symbol=.BXBT&count=120&columns=price&reverse=true"
-    f = requests.get(link)
-    prices = []
-    for x in f.json():
-        prices.append(x['price'])
+# def get_mean_open_close(number=120, kline_size='1m'):
+#     prices = []
+#     link = "https://www.bitmex.com/api/v1/trade?symbol=.BXBT&count=120&columns=price&reverse=true"
+#
+#     f = requests.get(link)
+#     for x in f.json():
+#         prices.append(x['price'])
+#     prices.reverse()
+#
+#     # DATA = np.array(prices)
+#     # bbands = ti.bbands(DATA, period=5, stddev=2)
+#
+#     res = TA.BBANDS(get_all_bitmex('XBTUSD', kline_size, False, nb=number))
+#
+#     low = list(res.BB_LOWER[120:])
+#     middle = list(res.BB_MIDDLE[120:])
+#     high = list(res.BB_UPPER[120:])
+#
+#     plt.plot(high, color='orange')
+#     plt.plot(middle, color='g')
+#     plt.plot(low, color='yellow')
+#     plt.plot(prices, color='red')
+#     plt.show()
+#
+#     # price = data_df.copy()
+#     # price['price'] = price.open
+#     return res
 
-    print(prices)
-    prices.reverse()
-    DATA = np.array(prices)
-    res = TA.BBANDS(data_df)
-    low = list(res.BB_LOWER)
-    middle = list(res.BB_MIDDLE)
-    high = list(res.BB_UPPER)
+def adjust_bbs(current, last_price):
+    if current.BB_UPPER.item() < last_price:
+        current.BB_UPPER = last_price + 1
+    elif current.BB_LOWER.item() > last_price:
+        current.BB_UPPER = last_price - 1
+    if current.BB_MIDDLE.item() < last_price:
+        current.BB_MIDDLE = last_price
+    elif current.BB_MIDDLE.item() > last_price:
+        current.BB_MIDDLE = last_price
 
-    # plt.plot(high, color='orange')
-    # plt.plot(middle, color='g')
-    # plt.plot(low, color='yellow')
-    # plt.plot(prices, color='red')
-    # plt.show()
+    return current
 
-    price = data_df.copy()
-    price['price'] = price.open
-    return price
 
+def get_phase_normal(bb, last_price):
+    prices_up = []
+    prices_down = []
+    current = bb[-1:]
+    spread_pctg = 0.15
+
+    current = adjust_bbs(current, last_price)
+    # if current.BB_MIDDLE.item() < last_price:
+    #     current.BB_MIDDLE = last_price
+    # if current.BB_UPPER.item() < last_price:
+    #     current.BB_UPPER = last_price + 1
+    # elif current.BB_LOWER.item() > last_price:
+    #     current.BB_UPPER = last_price - 1
+
+    spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 4
+    spread_bottom = (round(current.BB_MIDDLE) - round(current.BB_LOWER)) / 4
+
+    for i in range(0, 5):
+        prices_up.append(round(current.BB_MIDDLE) + (spread_up * i))
+    prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
+    prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg * 2) / 100)
+    prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg * 4) / 100)
+
+    for i in range(0, 5):
+        prices_down.append(round(current.BB_MIDDLE) - (spread_bottom * i))
+    prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
+    prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg * 2) / 100)
+    prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg * 4) / 100)
+
+
+    return prices_up, prices_down
+
+
+
+def get_phase_middle(bb, quantity, last_price):
+    prices_up = []
+    prices_down = []
+    current = bb[-1:]
+    spread_pctg = 0.15
+
+    current = adjust_bbs(current, last_price)
+
+    # if current.BB_MIDDLE.item() < last_price:
+    #     current.BB_MIDDLE = last_price
+
+    if quantity > 0:
+        spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 6
+        for i in range(0, 7):
+            prices_up.append(round(current.BB_MIDDLE) + (spread_up * i))
+        prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
+        for i in range(0, 8):
+            prices_down.append(round(current.BB_LOWER) * (100 - (i * spread_pctg)) / 100)
+
+    if quantity < 0:
+        spread_bottom = (round(current.BB_MIDDLE) - round(current.BB_LOWER)) / 6
+        for i in range(0, 7):
+            prices_down.append(round(current.BB_MIDDLE) - (spread_bottom * i))
+        prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
+        for i in range(0, 8):
+            prices_up.append(round(current.BB_UPPER) * (100 + (i * spread_pctg)) / 100)
+
+    return prices_up, prices_down
+
+
+def get_phase_low(bb, quantity, last_price):
+    prices_up = []
+    prices_down = []
+    current = bb[-1:]
+    spread_pctg = 0.15
+
+    current = adjust_bbs(current, last_price)
+
+    # if current.BB_MIDDLE.item() < last_price:
+    #     current.BB_MIDDLE = last_price
+
+    if quantity > 0:
+        spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 7
+        for i in range(0, 8):
+            prices_up.append(round(current.BB_MIDDLE) + (spread_up * i))
+        for i in range(0, 8):
+            prices_down.append(round(current.BB_LOWER) * (100 - (i * spread_pctg)) / 100)
+
+    if quantity < 0:
+        spread_bottom = (round(current.BB_MIDDLE) - round(current.BB_LOWER)) / 7
+        for i in range(0, 8):
+            prices_down.append(round(current.BB_MIDDLE) - (spread_bottom * i))
+        for i in range(0, 8):
+            prices_up.append(round(current.BB_UPPER) * (100 + (i * spread_pctg)) / 100)
+
+    return prices_up, prices_down
+
+
+def get_price(wallet, bb, quantity, last_price):
+    prices_up = []
+    prices_down = []
+    if wallet >= 75:
+        prices_up, prices_down = get_phase_normal(bb, last_price)
+    elif wallet >= 60:
+        prices_up, prices_down = get_phase_middle(bb, quantity, last_price)
+    elif wallet >= 45:
+        prices_up, prices_down = get_phase_low(bb, quantity, last_price)
+    ##
+    ##              FINISH
+    ##
+    else:
+        prices_up, prices_down = get_phase_low(bb, quantity, last_price)
+
+    return prices_up, prices_down
+
+
+def clean_prices(prices_up, prices_down):
+    ret_up, ret_down = [], []
+    i = 1
+    for x in prices_up:
+        if x.item() in ret_up:
+            ret_up.append(round(x.item()) + (0.5 * i))
+        else:
+            ret_up.append(round(x.item()))
+        i += 1
+
+    i = 1
+    for x in prices_down:
+        if x.item() in ret_up:
+            ret_down.append(round(x.item()) - (0.5 * i))
+        else:
+            ret_down.append(round(x.item()))
+        i += 1
+
+    return ret_up, ret_down
 
 ##          VERSION 1
 ## -----------------------------
@@ -100,9 +246,9 @@ def reajust_price(entry_price, desired_price, side, quantity, index):
         return round(((entry_price * 2) / 2) + 0.5 + (index))
 
     if quantity < -2500 and side == "Sell":
-        return round(desired_price + 10 + (index))
+        return round(desired_price + 5 + (index))
     elif quantity > 2500 and side == "Buy":
-        return round(desired_price - 10 -(index))
+        return round(desired_price - 5 -(index))
 
 
     if quantity < -2000 and side == "Sell":

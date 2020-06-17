@@ -4,7 +4,7 @@ import math
 import os.path
 import time
 from bitmex import bitmex
-from binance.client import Client
+# from binance.client import Client
 from datetime import timedelta, datetime
 from dateutil import parser
 from tqdm import tqdm_notebook #(Optional, used for progress-bars)
