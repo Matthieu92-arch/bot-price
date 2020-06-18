@@ -398,7 +398,7 @@ class OrderManager:
 
         # price = self.get_price_offset(index)
         # price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
-        quantity = reajust_qty(self.running_qty, quantity, side, index)
+        # quantity = reajust_qty(self.running_qty, quantity, side, index)
 
         return {'price': price, 'orderQty': quantity, 'side': "Buy" if index < 0 else "Sell"}
 
@@ -435,8 +435,8 @@ class OrderManager:
                         # If price has changed, and the change is more than our RELIST_INTERVAL, amend.
                         desired_order['price'] != order['price'] and
                         abs((desired_order['price'] / order['price']) - 1) > settings.RELIST_INTERVAL):
-                    to_amend.append({'orderID': order['orderID'], 'orderQty': reajust_qty(self.running_qty, order['cumQty'] + desired_order['orderQty'], order['side'], cpt / 2),
-                                     'price': reajust_price(position['avgEntryPrice'], desired_order['price'], order['side'], self.running_qty, cpt / 2), 'side': order['side']})
+                    to_amend.append({'orderID': order['orderID'], 'orderQty': desired_order['orderQty'],
+                                     'price': desired_order['price'], 'side': order['side']})
                     # to_amend.append({'orderID': order['orderID'], 'orderQty': order['cumQty'] + desired_order['orderQty'],
                     #                  'price': desired_order['price'], 'side': order['side']})
             except IndexError:
@@ -581,7 +581,7 @@ class OrderManager:
             self.check_file_change()
             sleep(settings.LOOP_INTERVAL)
             self.wallet = self.exchange.bitmex.funds()
-            self.wallet = (self.wallet['walletBalance'] * 100) / self.wallet['marginBalance']
+            self.wallet = (self.wallet['excessMargin'] * 100) / self.wallet['marginBalance']
 
             # This will restart on very short downtime, but if it's longer,
             # the MM will crash entirely as it is unable to connect to the WS on boot.
