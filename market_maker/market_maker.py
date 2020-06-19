@@ -403,7 +403,7 @@ class OrderManager:
         # price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
         # quantity = reajust_qty(self.running_qty, quantity, side, index)
 
-        return {'price': price, 'orderQty': quantity, 'side': "Buy" if index < 0 else "Sell"}
+        return {'price': price, 'orderQty': quantity, 'side': side}
 
 
     def converge_orders(self, buy_orders, sell_orders):
