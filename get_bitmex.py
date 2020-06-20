@@ -96,7 +96,7 @@ def get_mean_open_close(number=120, kline_size='1m'):
 
     f = requests.get(link)
     for x in f.json():
-        prices.append(x['price'])
+        prices.append(float(x['price']))
     prices = get_prices_binsize(prices, binsizes[kline_size])
     prices.reverse()
 
