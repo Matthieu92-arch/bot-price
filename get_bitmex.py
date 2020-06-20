@@ -15,16 +15,17 @@ from dateutil.tz import tzutc
 from finta import TA
 from jsonref import requests
 from tqdm import tqdm_notebook #(Optional, used for progress-bars)
+from market_maker.settings import settings
 
 ### API
 from market_maker.utils.dotdict import dotdict
-settings = {}
-settings = dotdict(settings)
 
+# set = {}
+# set = dotdict(settings)
 ### CONSTANTS
-binsizes = {"1m": 1, "5m": 5, "1h": 60, "1d": 1440}
+binsizes = {"1m": 1, "5m": 5, "1h": 60, "1d": 1440, "15m": 15}
 batch_size = 750
-bitmex_client = bitmex(test=False, api_key=settings.API_KEY, api_secret=settings.API_SECRET)
+bitmex_client = bitmex(test=True, api_key=settings.API_KEY, api_secret=settings.API_SECRET)
 # binance_client = Client(api_key=binance_api_key, api_secret=binance_api_secret)
 
 
@@ -82,8 +83,16 @@ def get_prices_binsize(prices, binsize):
 
 def get_mean_open_close(number=120, kline_size='1m'):
     prices = []
-    link = settings.BASE_URL + "trade?symbol=.BXBT&count="\
+
+    # A utiliser que pour testnet !!
+    link = str(settings.BASE_URL) + "trade?symbol=XBTUSD&count="\
            + str(number * binsizes[kline_size]) + "&columns=price&reverse=true"
+
+
+    # link = str(settings.BASE_URL) + "trade?symbol=.BXBT&count="\
+    #        + str(number * binsizes[kline_size]) + "&columns=price&reverse=true"
+
+
 
     f = requests.get(link)
     for x in f.json():
@@ -94,10 +103,13 @@ def get_mean_open_close(number=120, kline_size='1m'):
 
     # Library Tulipy
     DATA = np.array(prices)
-    bbands = ti.bbands(DATA, period=5, stddev=2)
+    bbands = ti.bbands(DATA, period=len(DATA), stddev=2)
 
     res = TA.BBANDS(get_all_bitmex('XBTUSD', kline_size, False, nb=(number * 2 * binsizes[kline_size])))
-
+    temp_df = pd.DataFrame()
+    temp_df['BB_LOWER'] = bbands[0][-1:]
+    temp_df['BB_MIDDLE'] = bbands[1][-1:]
+    temp_df['BB_UPPER'] = bbands[2][-1:]
     #
     #   AFFICHAGE COURBES
     #
@@ -110,10 +122,12 @@ def get_mean_open_close(number=120, kline_size='1m'):
     # middle = list(res.BB_MIDDLE[-number:])
     # high = list(res.BB_UPPER[-number:])
 
-    plt.plot(high, color='orange')
-    plt.plot(middle, color='g')
-    plt.plot(low, color='yellow')
-    plt.plot(prices, color='red')
-    plt.show()
+    # plt.plot(high, color='orange')
+    # plt.plot(middle, color='g')
+    # plt.plot(low, color='yellow')
+    # plt.plot(prices, color='red')
+    # plt.show()
 
-    return res[-number:]
+
+    return temp_df
+    # return res[-number:]

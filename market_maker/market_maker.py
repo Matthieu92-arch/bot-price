@@ -335,8 +335,10 @@ class OrderManager:
         # self.wallet = 70
         # self.running_qty = -1
 
+
+        ## faire propre fonction chopper les bougies bitmex ( remplacer la fonction get_all_bitmex)
         if self.wallet >= 75:
-            self.bb = get_mean_open_close(20, '1m')
+            self.bb = get_mean_open_close(20, '5m')
         elif self.wallet >= 60:
             self.bb = get_mean_open_close(20, '5m')
         elif self.wallet >= 45:

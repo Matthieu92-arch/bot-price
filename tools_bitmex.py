@@ -58,8 +58,8 @@ def get_phase_normal(bb, last_price):
 
     spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 4
     spread_bottom = (round(current.BB_MIDDLE) - round(current.BB_LOWER)) / 4
-    spread_up = 1 if spread_up.item() <= 0 else spread_up
-    spread_bottom =1 if spread_bottom.item() <= 0 else spread_bottom
+    spread_up = 1 if spread_up.item() <= 1 else spread_up
+    spread_bottom =1 if spread_bottom.item() <= 1 else spread_bottom
 
     for i in range(0, 5):
         prices_up.append(round(current.BB_MIDDLE) + (spread_up * (i + 1)))
