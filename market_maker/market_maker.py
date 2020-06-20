@@ -390,15 +390,15 @@ class OrderManager:
         position = self.exchange.get_position()
         self.running_qty = self.exchange.get_delta()
         # side = "Buy" if index < 0 else "Sell"
+        if side == 'Sell' and index < 0:
+            index = 1
+        elif side == 'Buy' and index > 0:
+            index = -1
 
         if settings.RANDOM_ORDER_SIZE is True:
             quantity = random.randint(settings.MIN_ORDER_SIZE, settings.MAX_ORDER_SIZE)
         else:
             quantity = settings.ORDER_START_SIZE + ((abs(index) - 1) * settings.ORDER_STEP_SIZE)
-        if side == 'Sell' and quantity > 0:
-            quantity = quantity * -1
-        elif side == 'Buy' and quantity < 0:
-            quantity = quantity * -1
         # price = self.get_price_offset(index)
         # price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
         # quantity = reajust_qty(self.running_qty, quantity, side, index)

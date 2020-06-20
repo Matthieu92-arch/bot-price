@@ -39,7 +39,7 @@ def adjust_bbs(current, last_price):
     if current.BB_UPPER.item() < last_price:
         current.BB_UPPER = last_price + 1
     elif current.BB_LOWER.item() > last_price:
-        current.BB_UPPER = last_price - 1
+        current.BB_LOWER = last_price - 1
     if current.BB_MIDDLE.item() < last_price:
         current.BB_MIDDLE = last_price
     elif current.BB_MIDDLE.item() > last_price:
