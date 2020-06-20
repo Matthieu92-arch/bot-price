@@ -62,7 +62,7 @@ def get_phase_normal(bb, last_price, entry_price):
     spread_bottom =1 if spread_bottom.item() <= 1 else spread_bottom
 
     middle_up = current.BB_MIDDLE
-    if entry_price > current.BB_MIDDLE:
+    if entry_price > current.BB_MIDDLE.item():
         middle_up = entry_price
     for i in range(0, 5):
         prices_up.append(round(middle_up) + (spread_up * (i + 1)))
@@ -71,7 +71,7 @@ def get_phase_normal(bb, last_price, entry_price):
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg * 4) / 100)
 
     middle_down = current.BB_MIDDLE
-    if entry_price < current.BB_MIDDLE:
+    if entry_price < current.BB_MIDDLE.item():
         middle_down = entry_price
     for i in range(0, 5):
         prices_down.append(round(middle_down) - (spread_bottom * (i + 1)))
@@ -169,6 +169,8 @@ def clean_prices(prices_up, prices_down):
     ret_up, ret_down = [], []
     i = 1
     for x in prices_up:
+        if isinstance(x, int):
+            ret_down.append(round(x) + (0.5 * i))
         if x.item() in ret_up:
             ret_up.append(round(x.item()) + (0.5 * i))
         else:
@@ -177,7 +179,9 @@ def clean_prices(prices_up, prices_down):
 
     i = 1
     for x in prices_down:
-        if x.item() in ret_up:
+        if isinstance(x, int):
+            ret_down.append(round(x) - (0.5 * i))
+        elif x.item() in ret_up:
             ret_down.append(round(x.item()) - (0.5 * i))
         else:
             ret_down.append(round(x.item()))

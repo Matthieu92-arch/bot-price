@@ -122,11 +122,11 @@ def get_mean_open_close(number=120, kline_size='1m'):
     # middle = list(res.BB_MIDDLE[-number:])
     # high = list(res.BB_UPPER[-number:])
 
-    plt.plot(high, color='orange')
-    plt.plot(middle, color='g')
-    plt.plot(low, color='yellow')
-    plt.plot(prices, color='red')
-    plt.show()
+    # plt.plot(high, color='orange')
+    # plt.plot(middle, color='g')
+    # plt.plot(low, color='yellow')
+    # plt.plot(prices, color='red')
+    # plt.show()
 
 
     return temp_df
