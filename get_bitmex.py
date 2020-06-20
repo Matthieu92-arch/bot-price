@@ -82,7 +82,7 @@ def get_prices_binsize(prices, binsize):
 
 def get_mean_open_close(number=120, kline_size='1m'):
     prices = []
-    link = "https://www.bitmex.com/api/v1/trade?symbol=.BXBT&count="\
+    link = settings.BASE_URL + "trade?symbol=.BXBT&count="\
            + str(number * binsizes[kline_size]) + "&columns=price&reverse=true"
 
     f = requests.get(link)
@@ -93,8 +93,8 @@ def get_mean_open_close(number=120, kline_size='1m'):
 
 
     # Library Tulipy
-    # DATA = np.array(prices)
-    # bbands = ti.bbands(DATA, period=5, stddev=2)
+    DATA = np.array(prices)
+    bbands = ti.bbands(DATA, period=5, stddev=2)
 
     res = TA.BBANDS(get_all_bitmex('XBTUSD', kline_size, False, nb=(number * 2 * binsizes[kline_size])))
 
@@ -102,14 +102,18 @@ def get_mean_open_close(number=120, kline_size='1m'):
     #   AFFICHAGE COURBES
     #
 
+    low = list(bbands[0])
+    middle = list(bbands[1])
+    high = list(bbands[2])
+
     # low = list(res.BB_LOWER[-number:])
     # middle = list(res.BB_MIDDLE[-number:])
     # high = list(res.BB_UPPER[-number:])
 
-    # plt.plot(high, color='orange')
-    # plt.plot(middle, color='g')
-    # plt.plot(low, color='yellow')
-    # plt.plot(prices, color='red')
-    # plt.show()
+    plt.plot(high, color='orange')
+    plt.plot(middle, color='g')
+    plt.plot(low, color='yellow')
+    plt.plot(prices, color='red')
+    plt.show()
 
     return res[-number:]
