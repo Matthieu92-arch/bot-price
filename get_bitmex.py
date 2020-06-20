@@ -103,7 +103,7 @@ def get_mean_open_close(number=120, kline_size='1m'):
 
     # Library Tulipy
     DATA = np.array(prices)
-    bbands = ti.bbands(DATA, period=len(DATA), stddev=2)
+    bbands = ti.bbands(DATA, period=5, stddev=2)
 
     res = TA.BBANDS(get_all_bitmex('XBTUSD', kline_size, False, nb=(number * 2 * binsizes[kline_size])))
     temp_df = pd.DataFrame()
@@ -122,11 +122,11 @@ def get_mean_open_close(number=120, kline_size='1m'):
     # middle = list(res.BB_MIDDLE[-number:])
     # high = list(res.BB_UPPER[-number:])
 
-    # plt.plot(high, color='orange')
-    # plt.plot(middle, color='g')
-    # plt.plot(low, color='yellow')
-    # plt.plot(prices, color='red')
-    # plt.show()
+    plt.plot(high, color='orange')
+    plt.plot(middle, color='g')
+    plt.plot(low, color='yellow')
+    plt.plot(prices, color='red')
+    plt.show()
 
 
     return temp_df

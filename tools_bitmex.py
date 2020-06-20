@@ -48,7 +48,7 @@ def adjust_bbs(current, last_price):
     return current
 
 
-def get_phase_normal(bb, last_price):
+def get_phase_normal(bb, last_price, entry_price):
     prices_up = []
     prices_down = []
     current = bb[-1:]
@@ -61,14 +61,20 @@ def get_phase_normal(bb, last_price):
     spread_up = 1 if spread_up.item() <= 1 else spread_up
     spread_bottom =1 if spread_bottom.item() <= 1 else spread_bottom
 
+    middle_up = current.BB_MIDDLE
+    if entry_price > current.BB_MIDDLE:
+        middle_up = entry_price
     for i in range(0, 5):
-        prices_up.append(round(current.BB_MIDDLE) + (spread_up * (i + 1)))
+        prices_up.append(round(middle_up) + (spread_up * (i + 1)))
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg * 2) / 100)
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg * 4) / 100)
 
+    middle_down = current.BB_MIDDLE
+    if entry_price < current.BB_MIDDLE:
+        middle_down = entry_price
     for i in range(0, 5):
-        prices_down.append(round(current.BB_MIDDLE) - (spread_bottom * (i + 1)))
+        prices_down.append(round(middle_down) - (spread_bottom * (i + 1)))
     prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
     prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg * 2) / 100)
     prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg * 4) / 100)
@@ -141,11 +147,11 @@ def get_phase_low(bb, quantity, last_price):
     return prices_up, prices_down
 
 
-def get_price(wallet, bb, quantity, last_price):
+def get_price(wallet, bb, quantity, last_price, entry_price):
     prices_up = []
     prices_down = []
     if wallet >= 75:
-        prices_up, prices_down = get_phase_normal(bb, last_price)
+        prices_up, prices_down = get_phase_normal(bb, last_price, entry_price)
     elif wallet >= 60:
         prices_up, prices_down = get_phase_middle(bb, quantity, last_price)
     elif wallet >= 45:

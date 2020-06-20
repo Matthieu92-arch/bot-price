@@ -346,8 +346,9 @@ class OrderManager:
         else:
             self.bb = get_mean_open_close(20, '5m')
         last_price = self.exchange.bitmex.ws.get_ticker('XBTUSD')['last']
+        entry_price = self.exchange.bitmex.position('XBTUSD')['avgEntryPrice']
 
-        prices_up, prices_down = get_price(self.wallet, self.bb, self.running_qty, last_price)
+        prices_up, prices_down = get_price(self.wallet, self.bb, self.running_qty, last_price, entry_price)
         prices_up, prices_down = clean_prices(prices_up, prices_down)
 
         for i in reversed(range(1, settings.ORDER_PAIRS + 1)):
