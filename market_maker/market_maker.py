@@ -353,9 +353,9 @@ class OrderManager:
 
         for i in reversed(range(1, settings.ORDER_PAIRS + 1)):
             if not self.long_position_limit_exceeded():
-                buy_orders.append(self.prepare_order(-i, prices_down[i], 'Buy'))
+                buy_orders.append(self.prepare_order(-i, prices_down[i - 1], 'Buy'))
             if not self.short_position_limit_exceeded():
-                sell_orders.append(self.prepare_order(i, prices_up[i], 'Sell'))
+                sell_orders.append(self.prepare_order(i, prices_up[i - 1], 'Sell'))
 
         return self.converge_orders(buy_orders, sell_orders)
 
