@@ -104,13 +104,6 @@ def get_phase_middle(bb, quantity, last_price, entry_price):
     if entry_price < current.BB_MIDDLE.item():
         middle_down = entry_price
 
-    middle_up = current.BB_MIDDLE
-    if entry_price > current.BB_MIDDLE.item():
-        middle_up = entry_price
-    middle_down = current.BB_MIDDLE
-    if entry_price < current.BB_MIDDLE.item():
-        middle_down = entry_price
-
 
     if quantity > 0:
         spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 6
