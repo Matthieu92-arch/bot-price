@@ -66,6 +66,8 @@ def get_phase_normal(bb, last_price, entry_price):
         middle_up = entry_price
     for i in range(0, 5):
         prices_up.append(round(middle_up) + (spread_up * (i + 1)))
+    if current.BB_UPPER.item() < entry_price:
+        current.BB_UPPER = entry_price
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg * 2) / 100)
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg * 4) / 100)
@@ -75,6 +77,8 @@ def get_phase_normal(bb, last_price, entry_price):
         middle_down = entry_price
     for i in range(0, 5):
         prices_down.append(round(middle_down) - (spread_bottom * (i + 1)))
+    if current.BB_LOWER.item() > entry_price:
+        current.BB_LOWER = entry_price
     prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
     prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg * 2) / 100)
     prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg * 4) / 100)
@@ -83,7 +87,7 @@ def get_phase_normal(bb, last_price, entry_price):
     return prices_up, prices_down
 
 
-def get_phase_middle(bb, quantity, last_price):
+def get_phase_middle(bb, quantity, last_price, entry_price):
     prices_up = []
     prices_down = []
     current = bb[-1:]
@@ -93,14 +97,31 @@ def get_phase_middle(bb, quantity, last_price):
 
     # if current.BB_MIDDLE.item() < last_price:
     #     current.BB_MIDDLE = last_price
+    middle_up = current.BB_MIDDLE
+    if entry_price > current.BB_MIDDLE.item():
+        middle_up = entry_price
+    middle_down = current.BB_MIDDLE
+    if entry_price < current.BB_MIDDLE.item():
+        middle_down = entry_price
+
+    middle_up = current.BB_MIDDLE
+    if entry_price > current.BB_MIDDLE.item():
+        middle_up = entry_price
+    middle_down = current.BB_MIDDLE
+    if entry_price < current.BB_MIDDLE.item():
+        middle_down = entry_price
+
 
     if quantity > 0:
         spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 6
         spread_up = 1 if spread_up.item() <= 0 else spread_up
 
         for i in range(1, 8):
-            prices_up.append(round(current.BB_MIDDLE) + (spread_up * i))
-        prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
+            prices_up.append(round(middle_up) + (spread_up * i))
+        if current.BB_UPPER.item() < entry_price:
+            prices_up.append(round(middle_up) * (100 + spread_pctg) / 100)
+        else:
+            prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
         for i in range(0, 8):
             prices_down.append(round(current.BB_LOWER) * (100 - (i * spread_pctg)) / 100)
 
@@ -108,8 +129,11 @@ def get_phase_middle(bb, quantity, last_price):
         spread_bottom = (round(current.BB_MIDDLE) - round(current.BB_LOWER)) / 6
         spread_bottom = 1 if spread_bottom.item() <= 0 else spread_bottom
         for i in range(1, 8):
-            prices_down.append(round(current.BB_MIDDLE) - (spread_bottom * i))
-        prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
+            prices_down.append(round(middle_down) - (spread_bottom * i))
+        if current.BB_LOWER.item() > entry_price:
+            prices_down.append(round(middle_down) * (100 - spread_pctg) / 100)
+        else:
+            prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
         for i in range(0, 8):
             prices_up.append(round(current.BB_UPPER) * (100 + (i * spread_pctg)) / 100)
 
@@ -153,7 +177,7 @@ def get_price(wallet, bb, quantity, last_price, entry_price):
     if wallet >= 75:
         prices_up, prices_down = get_phase_normal(bb, last_price, entry_price)
     elif wallet >= 60:
-        prices_up, prices_down = get_phase_middle(bb, quantity, last_price)
+        prices_up, prices_down = get_phase_middle(bb, quantity, last_price, entry_price)
     elif wallet >= 45:
         prices_up, prices_down = get_phase_low(bb, quantity, last_price)
     ##
@@ -179,7 +203,7 @@ def clean_prices(prices_up, prices_down):
 
     i = 1
     for x in prices_down:
-        if isinstance(x, int):
+        if isinstance(x, int) or isinstance(x, float):
             ret_down.append(round(x) - (0.5 * i))
         elif x.item() in ret_up:
             ret_down.append(round(x.item()) - (0.5 * i))

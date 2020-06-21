@@ -229,7 +229,7 @@ class OrderManager:
     def reset(self):
         self.exchange.cancel_all_orders()
         self.wallet = self.exchange.bitmex.funds()
-        self.wallet = (self.wallet['walletBalance'] * 100) / self.wallet['marginBalance']
+        self.wallet = (self.wallet['availableMargin'] * 100) / self.wallet['walletBalance']
         self.sanity_check()
         self.print_status()
 
@@ -587,7 +587,8 @@ class OrderManager:
             self.check_file_change()
             sleep(settings.LOOP_INTERVAL)
             self.wallet = self.exchange.bitmex.funds()
-            self.wallet = (self.wallet['excessMargin'] * 100) / self.wallet['marginBalance']
+            # self.wallet = (self.wallet['excessMargin'] * 100) / self.wallet['marginBalance']
+            self.wallet = (self.wallet['availableMargin'] * 100) / self.wallet['walletBalance']
 
             # This will restart on very short downtime, but if it's longer,
             # the MM will crash entirely as it is unable to connect to the WS on boot.
