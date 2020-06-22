@@ -118,7 +118,7 @@ def get_phase_middle(bb, quantity, last_price, entry_price):
             prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
             prices_up.append(round(current.BB_UPPER) * (100 + 1) / 100)
         for i in range(0, 9):
-            prices_down.append(round(current.BB_LOWER) * (100 - (i * spread_pctg)) / 100)
+            prices_down.append(round(current.BB_LOWER - 10) * (100 - (i * spread_pctg)) / 100)
         prices_down.append(round(current.BB_LOWER) * (100 - 1) / 100)
 
     if quantity < 0:
@@ -134,7 +134,7 @@ def get_phase_middle(bb, quantity, last_price, entry_price):
             prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
             prices_down.append(round(current.BB_LOWER) * (100 - 1) / 100)
         for i in range(0, 9):
-            prices_up.append(round(current.BB_UPPER) * (100 + (i * spread_pctg)) / 100)
+            prices_up.append(round(current.BB_UPPER + 10) * (100 + (i * spread_pctg)) / 100)
         prices_up.append(round(current.BB_UPPER) * (100 + 1) / 100)
 
     return prices_up, prices_down
