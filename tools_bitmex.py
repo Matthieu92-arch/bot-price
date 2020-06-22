@@ -228,6 +228,10 @@ def clean_prices(prices_up, prices_down):
 
 def get_quantity(position, side, index, wallet, quantity, funding):
     if wallet >= 75:
+        if position < 0 and side == 'Buy':
+            return quantity * 1.5
+        elif position > 0 and side == 'Sell':
+            return quantity * 1.5
         return quantity
     elif wallet >= 60:
         if position < 0 and side == 'Buy':
