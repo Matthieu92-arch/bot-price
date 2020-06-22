@@ -338,7 +338,7 @@ class OrderManager:
 
         ## faire propre fonction chopper les bougies bitmex ( remplacer la fonction get_all_bitmex)
         if self.wallet >= 75:
-            self.bb = get_mean_open_close(20, '5m')
+            self.bb = get_mean_open_close(20, '1m')
         elif self.wallet >= 60:
             self.bb = get_mean_open_close(20, '5m')
         elif self.wallet >= 45:
@@ -351,7 +351,7 @@ class OrderManager:
         prices_up, prices_down = get_price(self.wallet, self.bb, self.running_qty, last_price, entry_price)
         prices_up, prices_down = clean_prices(prices_up, prices_down)
 
-        for i in reversed(range(1, settings.ORDER_PAIRS + 1)):
+        for i in reversed(range(1, len(prices_down))):
             if not self.long_position_limit_exceeded():
                 buy_orders.append(self.prepare_order(-i, prices_down[i - 1], 'Buy'))
             if not self.short_position_limit_exceeded():

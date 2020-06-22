@@ -187,7 +187,7 @@ def clean_prices(prices_up, prices_down):
     i = 1
     for x in prices_up:
         if isinstance(x, int) or isinstance(x, float):
-            ret_down.append(round(x) + (0.5 * i))
+            ret_up.append(round(x) + (0.5 * i))
         elif x.item() in ret_up:
             ret_up.append(round(x.item()) + (0.5 * i))
         else:
