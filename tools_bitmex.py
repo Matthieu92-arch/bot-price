@@ -229,38 +229,38 @@ def clean_prices(prices_up, prices_down):
 def get_quantity(position, side, index, wallet, quantity, funding):
     if wallet >= 75:
         if position < 0 and side == 'Buy':
-            return quantity * 1.5
+            return round(quantity * 1.5)
         elif position > 0 and side == 'Sell':
-            return quantity * 1.5
+            return round(quantity * 1.5)
         return quantity
     elif wallet >= 60:
         if position < 0 and side == 'Buy':
             if funding < 0:
-                return quantity * 2.5
-            return quantity * 2
+                return round(quantity * 1.75)
+            return round(quantity * 1.6)
         elif position > 0 and side == 'Sell':
             if funding > 0:
-                return quantity * 2.5
-            return quantity * 2
-        return quantity
-    elif wallet >= 50:
-        if position < 0 and side == 'Buy':
-            if funding < 0:
-                return quantity * 3.5
-            return quantity * 3
-        elif position > 0 and side == 'Sell':
-            if funding > 0:
-                return quantity * 3.5
-            return quantity * 3
+                return round(quantity * 1.75)
+            return round(quantity * 1.6)
         return quantity
     else:
         if position < 0 and side == 'Buy':
             if funding < 0:
-                return quantity * 4.5
-            return quantity * 4
+                return round(quantity * 2.25)
+            return round(quantity * 2)
         elif position > 0 and side == 'Sell':
             if funding > 0:
-                return quantity * 4.5
-            return quantity * 4
+                return round(quantity * 2.25)
+            return round(quantity * 2)
         return quantity
+    # else:
+    #     if position < 0 and side == 'Buy':
+    #         if funding < 0:
+    #             return round(quantity * 3.5)
+    #         return quantity * 3
+    #     elif position > 0 and side == 'Sell':
+    #         if funding > 0:
+    #             return round(quantity * 3.5)
+    #         return quantity * 3
+    #     return quantity
     return quantity
