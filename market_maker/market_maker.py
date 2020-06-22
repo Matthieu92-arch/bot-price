@@ -339,13 +339,13 @@ class OrderManager:
 
         ## faire propre fonction chopper les bougies bitmex ( remplacer la fonction get_all_bitmex)
         if self.wallet >= 75:
-            self.bb,  self.bbands = get_mean_open_close(20, '1m')
+            self.bb,  self.bbands = get_mean_open_close(10, '1m')
         elif self.wallet >= 60:
-            self.bb,  self.bbands = get_mean_open_close(20, '5m')
+            self.bb,  self.bbands = get_mean_open_close(10, '5m')
         elif self.wallet >= 45:
-            self.bb,  self.bbands = get_mean_open_close(20, '5m')
+            self.bb,  self.bbands = get_mean_open_close(10, '5m')
         else:
-            self.bb,  self.bbands = get_mean_open_close(20, '5m')
+            self.bb,  self.bbands = get_mean_open_close(10, '5m')
         last_price = self.exchange.bitmex.ws.get_ticker('XBTUSD')['last']
         entry_price = self.exchange.bitmex.position('XBTUSD')['avgEntryPrice']
 
