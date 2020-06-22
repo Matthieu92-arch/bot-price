@@ -230,21 +230,21 @@ def get_quantity(position, side, index, wallet, quantity):
     if wallet >= 75:
         return quantity
     elif wallet >= 60:
-        if position < 0:
+        if position < 0 and side == 'Buy':
             return quantity * 2
-        elif position > 0:
+        elif position > 0 and side == 'Sell':
             return quantity * 2
         return quantity
     elif wallet >= 50:
-        if position < 0:
+        if position < 0 and side == 'Buy':
             return quantity * 3
-        elif position > 0:
+        elif position > 0 and side == 'Sell':
             return quantity * 3
         return quantity
     else:
-        if position < 0:
+        if position < 0 and side == 'Buy':
             return quantity * 4
-        elif position > 0:
+        elif position > 0 and side == 'Sell':
             return quantity * 4
         return quantity
     return quantity
