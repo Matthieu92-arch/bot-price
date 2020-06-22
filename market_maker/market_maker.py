@@ -16,7 +16,7 @@ from market_maker.utils import log, constants, errors, math
 # Used for reloading the bot - saves modified times of key files
 import os
 
-from tools_bitmex import reajust_qty, get_price, clean_prices, get_quantity
+from tools_bitmex import get_price, clean_prices, get_quantity
 
 watched_files_mtimes = [(f, getmtime(f)) for f in settings.WATCHED_FILES]
 
