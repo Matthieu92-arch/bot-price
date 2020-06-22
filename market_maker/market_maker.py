@@ -16,7 +16,7 @@ from market_maker.utils import log, constants, errors, math
 # Used for reloading the bot - saves modified times of key files
 import os
 
-from tools_bitmex import reajust_qty, reajust_price, get_price, clean_prices
+from tools_bitmex import reajust_qty, get_price, clean_prices, get_quantity
 
 watched_files_mtimes = [(f, getmtime(f)) for f in settings.WATCHED_FILES]
 
@@ -402,6 +402,8 @@ class OrderManager:
             quantity = random.randint(settings.MIN_ORDER_SIZE, settings.MAX_ORDER_SIZE)
         else:
             quantity = settings.ORDER_START_SIZE + ((abs(index) - 1) * settings.ORDER_STEP_SIZE)
+        quantity = get_quantity(self.running_qty, side, index, self.wallet, quantity)
+
         # price = self.get_price_offset(index)
         # price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
         # quantity = reajust_qty(self.running_qty, quantity, side, index)

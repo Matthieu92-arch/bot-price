@@ -62,22 +62,22 @@ def get_phase_normal(bb, last_price, entry_price, quantity):
     spread_bottom = 3 if spread_bottom.item() <= 3 else spread_bottom
 
     middle_up = current.BB_MIDDLE
-    if entry_price > current.BB_MIDDLE.item() and quantity > 0:
+    if entry_price and entry_price > current.BB_MIDDLE.item() and quantity > 0:
         middle_up = entry_price
     for i in range(0, 5):
         prices_up.append(round(middle_up) + (spread_up * (i + 1)))
-    if current.BB_UPPER.item() < entry_price:
+    if entry_price and current.BB_UPPER.item() < entry_price:
         current.BB_UPPER = entry_price
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg * 2) / 100)
     prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg * 4) / 100)
 
     middle_down = current.BB_MIDDLE
-    if entry_price < current.BB_MIDDLE.item() and quantity < 0:
+    if entry_price and entry_price < current.BB_MIDDLE.item() and quantity < 0:
         middle_down = entry_price
     for i in range(0, 5):
         prices_down.append(round(middle_down) - (spread_bottom * (i + 1)))
-    if current.BB_LOWER.item() > entry_price:
+    if entry_price and current.BB_LOWER.item() > entry_price:
         current.BB_LOWER = entry_price
     prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
     prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg * 2) / 100)
@@ -206,38 +206,8 @@ def clean_prices(prices_up, prices_down):
 
     return ret_up, ret_down
 
-##          VERSION 1
-## -----------------------------
 
-# def reajust_qty(position, quantity, side):
-#     if (position > 300 and side == "Sell") or (position < -300 and side == "Buy"):
-#         quantity += 25
-#     if (position > 500 and side == "Sell") or (position < -500 and side == "Buy"):
-#         quantity += 40
-#     if (position > 700 and side == "Sell") or (position < -700 and side == "Buy"):
-#         quantity += 60
-#     if (position > 1000 and side == "Sell") or (position < -1000 and side == "Buy"):
-#         quantity += 80
-#
-#     return quantity
-
-
-##          VERSION 2
-## -----------------------------
-# def reajust_qty(position, quantity, side, index):
-#     if (position > 300 and side == "Sell") or (position < -300 and side == "Buy"):
-#         quantity += 35
-#     if (position > 500 and side == "Sell") or (position < -500 and side == "Buy"):
-#         quantity += 50
-#     if (position > 700 and side == "Sell") or (position < -700 and side == "Buy"):
-#         quantity += 75
-#     if (position > 1000 and side == "Sell") or (position < -1000 and side == "Buy"):
-#         quantity = round((position * - 1) / 5)
-#
-#     return quantity
-
-
-def reajust_qty(position, quantity, side, index):
+def reajust_qty(position, quantity, side, index, wallet):
     if (position > 300 and side == "Sell") or (position < -300 and side == "Buy"):
         quantity += settings.ORDER_BALANCE_STEP_SIZE
     if (position > 500 and side == "Sell") or (position < -500 and side == "Buy"):
@@ -246,53 +216,65 @@ def reajust_qty(position, quantity, side, index):
     return quantity
 
 
-def reajust_price(entry_price, desired_price, side, quantity, index):
-    if index < 0:
-        index = (index * -1)
-    if not entry_price:
-        return round(desired_price)
-
-    ### Rapprocher ordres de entry_price si position commence à grandir
-    if side == 'Buy' and desired_price > entry_price and quantity < -700:
-        return round(((entry_price * 2) / 2) - 0.5 - (index))
-    elif side == 'Sell' and desired_price < entry_price and quantity > 700:
-        return round(((entry_price * 2) / 2) + 0.5 + (index))
-
-
-    ### Rapprocher prix de l'entry price si possible de close position de suite
-    ### Baisse de gains mais safe
-    if side == 'Buy' and desired_price < entry_price and quantity < -350:
-        return round(((entry_price * 2) / 2) - 0.5 - (index * 1))
-    elif side == 'Sell' and desired_price > entry_price and quantity > 350:
-        return round(((entry_price * 2) / 2) + 0.5 + (index * 1))
+def get_quantity(position, side, index, wallet, quantity):
+    if wallet >= 75:
+        return quantity
+    elif wallet >= 60:
+        return quantity * 2
+    elif wallet >= 50:
+        return quantity * 3
+    else:
+        return quantity * 4
+    return quantity
 
 
-    ### Ecarter prix CONTRE POSITION
-    if quantity < -750 and side == "Buy":
-        return round(((entry_price * 2) / 2) - 0.5 - (index))
-    elif quantity > 750 and side == "Sell":
-        return round(((entry_price * 2) / 2) + 0.5 + (index))
-
-    if quantity < -2500 and side == "Sell":
-        return round(desired_price + 5 + (index))
-    elif quantity > 2500 and side == "Buy":
-        return round(desired_price - 5 -(index))
-
-
-    if quantity < -2000 and side == "Sell":
-        return round(desired_price + 5 + (index))
-    elif quantity > 2000 and side == "Buy":
-        return round(desired_price - 5 -(index))
-
-    if quantity < -750 and side == "Sell":
-        return round(desired_price + (index))
-    elif quantity > 750 and side == "Buy":
-        return round(desired_price - (index))
-
-
-    if side == 'Buy' and desired_price > entry_price:
-        return round(entry_price - (index * 0.5))
-    elif side == 'Sell' and desired_price < entry_price:
-        return round(entry_price + (index * 0.5))
-
-    return round(desired_price)
+# def reajust_price(entry_price, desired_price, side, quantity, index):
+#     if index < 0:
+#         index = (index * -1)
+#     if not entry_price:
+#         return round(desired_price)
+#
+#     ### Rapprocher ordres de entry_price si position commence à grandir
+#     if side == 'Buy' and desired_price > entry_price and quantity < -700:
+#         return round(((entry_price * 2) / 2) - 0.5 - (index))
+#     elif side == 'Sell' and desired_price < entry_price and quantity > 700:
+#         return round(((entry_price * 2) / 2) + 0.5 + (index))
+#
+#
+#     ### Rapprocher prix de l'entry price si possible de close position de suite
+#     ### Baisse de gains mais safe
+#     if side == 'Buy' and desired_price < entry_price and quantity < -350:
+#         return round(((entry_price * 2) / 2) - 0.5 - (index * 1))
+#     elif side == 'Sell' and desired_price > entry_price and quantity > 350:
+#         return round(((entry_price * 2) / 2) + 0.5 + (index * 1))
+#
+#
+#     ### Ecarter prix CONTRE POSITION
+#     if quantity < -750 and side == "Buy":
+#         return round(((entry_price * 2) / 2) - 0.5 - (index))
+#     elif quantity > 750 and side == "Sell":
+#         return round(((entry_price * 2) / 2) + 0.5 + (index))
+#
+#     if quantity < -2500 and side == "Sell":
+#         return round(desired_price + 5 + (index))
+#     elif quantity > 2500 and side == "Buy":
+#         return round(desired_price - 5 -(index))
+#
+#
+#     if quantity < -2000 and side == "Sell":
+#         return round(desired_price + 5 + (index))
+#     elif quantity > 2000 and side == "Buy":
+#         return round(desired_price - 5 -(index))
+#
+#     if quantity < -750 and side == "Sell":
+#         return round(desired_price + (index))
+#     elif quantity > 750 and side == "Buy":
+#         return round(desired_price - (index))
+#
+#
+#     if side == 'Buy' and desired_price > entry_price:
+#         return round(entry_price - (index * 0.5))
+#     elif side == 'Sell' and desired_price < entry_price:
+#         return round(entry_price + (index * 0.5))
+#
+#     return round(desired_price)
