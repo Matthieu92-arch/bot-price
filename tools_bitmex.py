@@ -97,8 +97,6 @@ def get_phase_middle(bb, quantity, last_price, entry_price):
 
     current = adjust_bbs(current, last_price)
 
-    # if current.BB_MIDDLE.item() < last_price:
-    #     current.BB_MIDDLE = last_price
     middle_up = current.BB_MIDDLE
     if entry_price > current.BB_MIDDLE.item():
         middle_up = entry_price
@@ -148,9 +146,6 @@ def get_phase_low(bb, quantity, last_price):
     spread_pctg = 0.30
 
     current = adjust_bbs(current, last_price)
-
-    # if current.BB_MIDDLE.item() < last_price:
-    #     current.BB_MIDDLE = last_price
 
     if quantity > 0:
         spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 7
