@@ -130,4 +130,4 @@ def get_mean_open_close(number=120, kline_size='1m'):
 
 
     # return temp_df
-    return res[-number:]
+    return res[-number:], bbands
