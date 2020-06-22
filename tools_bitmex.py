@@ -109,33 +109,33 @@ def get_phase_middle(bb, quantity, last_price, entry_price):
         spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 6
         spread_up = 3 if spread_up.item() <= 3 else spread_up
 
-        for i in range(1, 7):
+        for i in range(1, 8):
             prices_up.append(round(middle_up) + (spread_up * (i - 1)))
         if current.BB_UPPER.item() < entry_price:
             prices_up.append(round(middle_up) * (100 + spread_pctg) / 100)
-            prices_up.append(round(middle_up) * (100 + 1) / 100)
+            prices_up.append(round(middle_up) * (100 + 1.5) / 100)
         else:
             prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
-            prices_up.append(round(current.BB_UPPER) * (100 + 1) / 100)
+            prices_up.append(round(current.BB_UPPER) * (100 + 1.5) / 100)
         for i in range(0, 9):
-            prices_down.append(round(current.BB_LOWER - 10) * (100 - (i * spread_pctg)) / 100)
-        prices_down.append(round(current.BB_LOWER) * (100 - 1) / 100)
+            prices_down.append(round(current.BB_LOWER) * (100 - (i * spread_pctg)) / 100)
+        prices_down.append(round(current.BB_LOWER) * (100 - 1.5) / 100)
 
     if quantity < 0:
         spread_bottom = (round(current.BB_MIDDLE) - round(current.BB_LOWER)) / 6
         spread_bottom = 3 if spread_bottom.item() <= 3 else spread_bottom
 
-        for i in range(1, 7):
+        for i in range(1, 8):
             prices_down.append(round(middle_down) - (spread_bottom * (i - 1)))
         if current.BB_LOWER.item() > entry_price:
             prices_down.append(round(middle_down) * (100 - spread_pctg) / 100)
-            prices_down.append(round(middle_down) * (100 - 1) / 100)
+            prices_down.append(round(middle_down) * (100 - 1.5) / 100)
         else:
             prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
-            prices_down.append(round(current.BB_LOWER) * (100 - 1) / 100)
+            prices_down.append(round(current.BB_LOWER) * (100 - 1.5) / 100)
         for i in range(0, 9):
-            prices_up.append(round(current.BB_UPPER + 10) * (100 + (i * spread_pctg)) / 100)
-        prices_up.append(round(current.BB_UPPER) * (100 + 1) / 100)
+            prices_up.append(round(current.BB_UPPER) * (100 + (i * spread_pctg)) / 100)
+        prices_up.append(round(current.BB_UPPER) * (100 + 1.5) / 100)
 
     return prices_up, prices_down
 
@@ -154,10 +154,10 @@ def get_phase_low(bb, quantity, last_price):
 
         for i in range(0, 9):
             prices_up.append(round(current.BB_MIDDLE) + (spread_up * i))
-        prices_up.append(round(current.BB_UPPER) * (100 + 1) / 100)
+        prices_up.append(round(current.BB_UPPER) * (100 + 2.5) / 100)
         for i in range(0, 9):
             prices_down.append(round(current.BB_LOWER) * (100 - (i * spread_pctg)) / 100)
-        prices_down.append(round(current.BB_LOWER) * (100 - 1) / 100)
+        prices_down.append(round(current.BB_LOWER) * (100 - 2.5) / 100)
 
 
     if quantity < 0:
@@ -165,10 +165,10 @@ def get_phase_low(bb, quantity, last_price):
         spread_bottom = 3 if spread_bottom.item() <= 3 else spread_bottom
         for i in range(0, 9):
             prices_down.append(round(current.BB_MIDDLE) - (spread_bottom * i))
-        prices_down.append(round(current.BB_LOWER) * (100 - 1) / 100)
+        prices_down.append(round(current.BB_LOWER) * (100 - 2.5) / 100)
         for i in range(0, 9):
             prices_up.append(round(current.BB_UPPER) * (100 + (i * spread_pctg)) / 100)
-        prices_up.append(round(current.BB_UPPER) * (100 + 1) / 100)
+        prices_up.append(round(current.BB_UPPER) * (100 + 2.5) / 100)
 
 
     return prices_up, prices_down
