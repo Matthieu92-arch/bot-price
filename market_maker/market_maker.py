@@ -481,6 +481,8 @@ class OrderManager:
                     sleep(0.5)
                     return self.place_orders()
                 else:
+                    if 'Invalid amend: orderQty' in errorObj:
+                        return self.place_orders()
                     logger.error("Unknown error on amend: %s. Exiting" % errorObj)
                     sys.exit(1)
 
