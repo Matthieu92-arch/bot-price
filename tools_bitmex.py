@@ -112,12 +112,12 @@ def get_phase_middle(bb, quantity, last_price, entry_price):
         for i in range(1, 8):
             prices_up.append(round(middle_up) + (spread_up * (i - 1)))
         if current.BB_UPPER.item() < entry_price:
-            prices_up.append(round(middle_up) * (100 + spread_pctg) / 100)
+            prices_up.append(round(middle_up) * (100 + 0.5) / 100)
             prices_up.append(round(middle_up) * (100 + 1.5) / 100)
         else:
-            prices_up.append(round(current.BB_UPPER) * (100 + spread_pctg) / 100)
+            prices_up.append(round(current.BB_UPPER) * (100 + 0.5) / 100)
             prices_up.append(round(current.BB_UPPER) * (100 + 1.5) / 100)
-        for i in range(0, 9):
+        for i in range(0, 8):
             prices_down.append(round(current.BB_LOWER) * (100 - (i * spread_pctg)) / 100)
         prices_down.append(round(current.BB_LOWER) * (100 - 1.5) / 100)
 
@@ -128,12 +128,12 @@ def get_phase_middle(bb, quantity, last_price, entry_price):
         for i in range(1, 8):
             prices_down.append(round(middle_down) - (spread_bottom * (i - 1)))
         if current.BB_LOWER.item() > entry_price:
-            prices_down.append(round(middle_down) * (100 - spread_pctg) / 100)
+            prices_down.append(round(middle_down) * (100 - 0.5) / 100)
             prices_down.append(round(middle_down) * (100 - 1.5) / 100)
         else:
-            prices_down.append(round(current.BB_LOWER) * (100 - spread_pctg) / 100)
+            prices_down.append(round(current.BB_LOWER) * (100 - 0.5) / 100)
             prices_down.append(round(current.BB_LOWER) * (100 - 1.5) / 100)
-        for i in range(0, 9):
+        for i in range(0, 8):
             prices_up.append(round(current.BB_UPPER) * (100 + (i * spread_pctg)) / 100)
         prices_up.append(round(current.BB_UPPER) * (100 + 1.5) / 100)
 
