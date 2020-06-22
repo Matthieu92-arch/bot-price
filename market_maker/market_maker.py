@@ -402,7 +402,8 @@ class OrderManager:
             quantity = random.randint(settings.MIN_ORDER_SIZE, settings.MAX_ORDER_SIZE)
         else:
             quantity = settings.ORDER_START_SIZE + ((abs(index) - 1) * settings.ORDER_STEP_SIZE)
-        quantity = get_quantity(self.running_qty, side, index, self.wallet, quantity)
+        quantity = get_quantity(self.running_qty, side, index, self.wallet, quantity,
+                                self.exchange.get_instrument()['fundingRate'])
 
         # price = self.get_price_offset(index)
         # price = reajust_price(position['avgEntryPrice'], price, side, self.running_qty, index)
