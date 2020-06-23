@@ -35,11 +35,7 @@ from get_bitmex import get_all_bitmex
 #     # price['price'] = price.open
 #     return res
 
-def adjust_bbs(current, last_price, bbands):
-    current.BB_LOWER = current.BB_LOWER.item()
-    current.BB_UPPER = current.BB_UPPER.item()
-    current.BB_MIDDLE = current.BB_MIDDLE.item()
-
+def adjust_bbs(current, last_price, bbands, funding):
     if current.BB_UPPER.item() < last_price:
         current.BB_UPPER = last_price + 1
     elif current.BB_LOWER.item() > last_price:
@@ -49,20 +45,24 @@ def adjust_bbs(current, last_price, bbands):
     elif current.BB_MIDDLE.item() > last_price:
         current.BB_MIDDLE = last_price
 
-    if last_price - current.BB_LOWER.item() > 90:
+    if last_price - current.BB_LOWER.item() > 40 and funding < 0:
+        current.BB_LOWER = last_price - 20
+    elif last_price - current.BB_LOWER.item() > 90:
         current.BB_LOWER = last_price - 40
+    if current.BB_UPPER.item() - last_price > 40 and funding > 0:
+        current.BB_UPPER = last_price + 20
     if current.BB_UPPER.item() - last_price > 90:
         current.BB_UPPER = last_price + 40
     return current
 
 
-def get_phase_normal(bb, bbands, last_price, entry_price, quantity):
+def get_phase_normal(bb, bbands, last_price, entry_price, quantity, funding):
     prices_up = []
     prices_down = []
     current = bb[-1:]
     spread_pctg = 0.15
 
-    current = adjust_bbs(current, last_price, bbands)
+    current = adjust_bbs(current, last_price, bbands, funding)
 
     spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 4
     spread_bottom = (round(current.BB_MIDDLE) - round(current.BB_LOWER)) / 4
@@ -97,13 +97,13 @@ def get_phase_normal(bb, bbands, last_price, entry_price, quantity):
     return prices_up, prices_down
 
 
-def get_phase_middle(bb, bbands, quantity, last_price, entry_price):
+def get_phase_middle(bb, bbands, quantity, last_price, entry_price, funding):
     prices_up = []
     prices_down = []
     current = bb[-1:]
     spread_pctg = 0.15
 
-    current = adjust_bbs(current, last_price, bbands)
+    current = adjust_bbs(current, last_price, bbands, funding)
 
     middle_up = current.BB_MIDDLE.item() + 0.5
     if quantity > 0:
@@ -151,13 +151,13 @@ def get_phase_middle(bb, bbands, quantity, last_price, entry_price):
     return prices_up, prices_down
 
 
-def get_phase_low(bb, bbands, quantity, last_price):
+def get_phase_low(bb, bbands, quantity, last_price, funding):
     prices_up = []
     prices_down = []
     current = bb[-1:]
     spread_pctg = 0.30
 
-    current = adjust_bbs(current, last_price, bbands)
+    current = adjust_bbs(current, last_price, bbands, funding)
 
     if quantity > 0:
         spread_up = (round(current.BB_UPPER) - round(current.BB_MIDDLE)) / 7
@@ -185,15 +185,15 @@ def get_phase_low(bb, bbands, quantity, last_price):
     return prices_up, prices_down
 
 
-def get_price(wallet, bb, bbands, quantity, last_price, entry_price):
+def get_price(wallet, bb, bbands, quantity, last_price, entry_price, funding):
     prices_up = []
     prices_down = []
     if wallet >= 75:
-        prices_up, prices_down = get_phase_normal(bb, bbands, last_price, entry_price, quantity)
+        prices_up, prices_down = get_phase_normal(bb, bbands, last_price, entry_price, quantity, funding)
     elif wallet >= 60:
-        prices_up, prices_down = get_phase_middle(bb, bbands, quantity, last_price, entry_price)
+        prices_up, prices_down = get_phase_middle(bb, bbands, quantity, last_price, entry_price, funding)
     elif wallet >= 45:
-        prices_up, prices_down = get_phase_low(bb, bbands, quantity, last_price)
+        prices_up, prices_down = get_phase_low(bb, bbands, quantity, last_price, funding)
     ##
     ##              FINISH
     ##
@@ -239,6 +239,8 @@ def clean_prices(prices_up, prices_down):
 
 def get_quantity(position, side, index, wallet, quantity, funding):
     if wallet > 93:
+        return quantity
+    elif wallet >= 75 and (position > -200 or position < 200):
         return quantity
     elif wallet >= 75:
         if position < 0 and side == 'Buy':
