@@ -485,8 +485,8 @@ class OrderManager:
                 elif 'Invalid amend: orderQty' in errorObj['error']['message']:
                     return self.place_orders()
                 elif 'Market is not open' in errorObj['error']['message']:
-                    sleep(45)
-                    return self.place_orders()
+                    sleep(30)
+                    return self.reset()
                 logger.error("Unknown error on amend: %s. Exiting" % errorObj)
                 sys.exit(1)
 
