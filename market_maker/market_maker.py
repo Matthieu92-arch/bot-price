@@ -482,11 +482,13 @@ class OrderManager:
                     logger.warn("Amending failed. Waiting for order data to converge and retrying.")
                     sleep(0.5)
                     return self.place_orders()
-                else:
-                    if 'Invalid amend: orderQty' in errorObj['error']['message']:
-                        return self.place_orders()
-                    logger.error("Unknown error on amend: %s. Exiting" % errorObj)
-                    sys.exit(1)
+                elif 'Invalid amend: orderQty' in errorObj['error']['message']:
+                    return self.place_orders()
+                elif 'Market is not open' in errorObj['error']['message']:
+                    sleep(45)
+                    return self.place_orders()
+                logger.error("Unknown error on amend: %s. Exiting" % errorObj)
+                sys.exit(1)
 
         if len(to_create) > 0:
             logger.info("Creating %d orders:" % (len(to_create)))
