@@ -106,12 +106,14 @@ def get_phase_middle(bb, bbands, quantity, last_price, entry_price, funding):
     current = adjust_bbs(current, last_price, bbands, funding)
 
     middle_up = current.BB_MIDDLE.item() + 0.5
+    middle_down = current.BB_MIDDLE.item() - 0.5
     if quantity > 0:
+        middle_down = current.BB_LOWER() - 5
         middle_up = entry_price
         if middle_up < last_price:
             middle_up = last_price + 0.5
-    middle_down = current.BB_MIDDLE.item() - 0.5
     if quantity < 0:
+        middle_up = current.BB_UPPER + 5
         middle_down = entry_price - 0.5
         if middle_down > last_price:
             middle_down = last_price - 0.5
