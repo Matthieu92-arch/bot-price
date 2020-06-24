@@ -484,7 +484,7 @@ class OrderManager:
                     return self.place_orders()
                 elif 'Invalid amend: orderQty' in errorObj['error']['message']:
                     sleep(0.5)
-                    return self.place_orders()
+                    return self.reset()
                 elif 'Market is not open' in errorObj['error']['message']:
                     sleep(30)
                     return self.reset()
