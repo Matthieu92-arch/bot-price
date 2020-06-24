@@ -200,7 +200,7 @@ def get_price(wallet, bb, bbands, quantity, last_price, entry_price, funding):
     ##              FINISH
     ##
     else:
-        prices_up, prices_down = get_phase_low(bb, quantity, last_price)
+        prices_up, prices_down = get_phase_low(bb, bbands, quantity, last_price, funding)
 
     return prices_up, prices_down
 
