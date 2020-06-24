@@ -243,6 +243,14 @@ def get_quantity(position, side, index, wallet, quantity, funding):
     if wallet > 93:
         return quantity
     elif wallet >= 75 and (position > -200 or position < 200):
+        if position < 0 and side == 'Buy':
+            if funding < 0:
+                return round(quantity * 1.16)
+            return quantity
+        elif position > 0 and side == 'Sell':
+            if funding > 0:
+                return round(quantity * 1.16)
+            return quantity
         return quantity
     elif wallet >= 75:
         if position < 0 and side == 'Buy':
