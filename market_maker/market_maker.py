@@ -428,7 +428,7 @@ class OrderManager:
         sells_matched = 0
         cpt = 0
         existing_orders = self.exchange.get_orders()
-        buy_orders, sell_orders = tri_orders(position, existing_orders, buy_orders, sell_orders)
+        # buy_orders, sell_orders = tri_orders(position, existing_orders, buy_orders, sell_orders)
 
         # Check all existing orders and match them up with what we want to place.
         # If there's an open one, we might be able to amend it to fit what we want.

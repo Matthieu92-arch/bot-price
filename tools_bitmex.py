@@ -310,11 +310,11 @@ def tri_orders(position, existing_orders, buy_orders, sell_orders):
     if position['currentQty'] > 0:
         if buys_matched < 4:
             return buy_orders, sell_orders
-        else:
+        elif existing_orders:
             existing_orders = [k for k in existing_orders if k['side'] == 'Sell']
     if position['currentQty'] < 0:
         if sells_matched < 4:
             return buy_orders, sell_orders
-        else:
+        elif existing_orders:
             existing_orders = [k for k in existing_orders if k['side'] == 'Buy']
     return buy_orders, sell_orders
