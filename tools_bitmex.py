@@ -1,3 +1,5 @@
+from ast import literal_eval
+
 from jsonref import requests
 from pandas import np
 from finta import TA
@@ -293,3 +295,26 @@ def get_quantity(position, side, index, wallet, quantity, funding):
     #         return quantity * 3
     #     return quantity
     return quantity
+
+
+
+def tri_orders(position, existing_orders, buy_orders, sell_orders):
+    buys_matched = 0
+    sells_matched = 0
+    for order in existing_orders:
+        if order['side'] == 'Buy':
+            buys_matched += 1
+        else:
+            sells_matched += 1
+
+    if position['currentQty'] > 0:
+        if buys_matched < 4:
+            return buy_orders, sell_orders
+        else:
+            existing_orders = [k for k in existing_orders if k['side'] == 'Sell']
+    if position['currentQty'] < 0:
+        if sells_matched < 4:
+            return buy_orders, sell_orders
+        else:
+            existing_orders = [k for k in existing_orders if k['side'] == 'Buy']
+    return buy_orders, sell_orders

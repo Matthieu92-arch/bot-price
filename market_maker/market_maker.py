@@ -16,7 +16,7 @@ from market_maker.utils import log, constants, errors, math
 # Used for reloading the bot - saves modified times of key files
 import os
 
-from tools_bitmex import get_price, clean_prices, get_quantity
+from tools_bitmex import get_price, clean_prices, get_quantity, tri_orders
 
 watched_files_mtimes = [(f, getmtime(f)) for f in settings.WATCHED_FILES]
 
@@ -338,6 +338,7 @@ class OrderManager:
 
 
         ## faire propre fonction chopper les bougies bitmex ( remplacer la fonction get_all_bitmex)
+        self.bb,  self.bbands = get_mean_open_close(20, '1m')
         if self.wallet >= 75:
             self.bb,  self.bbands = get_mean_open_close(10, '1m')
         elif self.wallet >= 60:
@@ -427,6 +428,7 @@ class OrderManager:
         sells_matched = 0
         cpt = 0
         existing_orders = self.exchange.get_orders()
+        buy_orders, sell_orders = tri_orders(position, existing_orders, buy_orders, sell_orders)
 
         # Check all existing orders and match them up with what we want to place.
         # If there's an open one, we might be able to amend it to fit what we want.

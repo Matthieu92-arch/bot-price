@@ -85,15 +85,19 @@ def get_mean_open_close(number=120, kline_size='1m'):
     prices = []
 
     # A utiliser que pour testnet !!
-    link = str(settings.BASE_URL) + "trade?symbol=XBTUSD&count="\
-           + str(number * binsizes[kline_size]) + "&columns=price&reverse=true"
-
-
-    # link = str(settings.BASE_URL) + "trade?symbol=.BXBT&count="\
+    # link = str(settings.BASE_URL) + "trade?symbol=XBTUSD&count="\
     #        + str(number * binsizes[kline_size]) + "&columns=price&reverse=true"
 
 
+    link_ohlc = "https://www.bitmex.com/api/v1/trade/bucketed?binSize=1m&partial=true&symbol=XBTUSD&count=20&reverse=true"
+    f = requests.get(link_ohlc)
+    ohlc = pd.DataFrame(f.json())
+    ohlc = ohlc[['open', 'high', 'low', 'close']]
+    # datta = TA.bb
 
+
+    link = str(settings.BASE_URL) + "trade?symbol=.BXBT&count="\
+           + str(number * binsizes[kline_size]) + "&columns=price&reverse=true"
     f = requests.get(link)
     for x in f.json():
         prices.append(float(x['price']))
@@ -118,9 +122,9 @@ def get_mean_open_close(number=120, kline_size='1m'):
     middle = list(bbands[1])
     high = list(bbands[2])
 
-    # low = list(res.BB_LOWER[-number:])
-    # middle = list(res.BB_MIDDLE[-number:])
-    # high = list(res.BB_UPPER[-number:])
+    low = list(res.BB_LOWER[-number:])
+    middle = list(res.BB_MIDDLE[-number:])
+    high = list(res.BB_UPPER[-number:])
 
     # plt.plot(high, color='orange')
     # plt.plot(middle, color='g')
