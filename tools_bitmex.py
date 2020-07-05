@@ -266,24 +266,36 @@ def get_quantity(position, side, index, wallet, quantity, funding):
         return quantity
     elif wallet >= 60:
         if position < 0 and side == 'Buy':
-            if funding < 0:
-                return round(quantity * 1.53)
-            return round(quantity * 1.4)
+            return get_quantity_low(position, index)
         elif position > 0 and side == 'Sell':
-            if funding > 0:
-                return round(quantity * 1.53)
-            return round(quantity * 1.4)
+            return get_quantity_low(position, index)
         return quantity
     else:
         if position < 0 and side == 'Buy':
-            if funding < 0:
-                return round(quantity * 2.25)
-            return round(quantity * 2)
+            return get_quantity_low(position, index)
         elif position > 0 and side == 'Sell':
-            if funding > 0:
-                return round(quantity * 2.25)
-            return round(quantity * 2)
+            return get_quantity_low(position, index)
         return quantity
+    # elif wallet >= 60:
+    #     if position < 0 and side == 'Buy':
+    #         if funding < 0:
+    #             return round(quantity * 1.53)
+    #         return round(quantity * 1.4)
+    #     elif position > 0 and side == 'Sell':
+    #         if funding > 0:
+    #             return round(quantity * 1.53)
+    #         return round(quantity * 1.4)
+    #     return quantity
+    # else:
+    #     if position < 0 and side == 'Buy':
+    #         if funding < 0:
+    #             return round(quantity * 2.25)
+    #         return round(quantity * 2)
+    #     elif position > 0 and side == 'Sell':
+    #         if funding > 0:
+    #             return round(quantity * 2.25)
+    #         return round(quantity * 2)
+    #     return quantity
     # else:
     #     if position < 0 and side == 'Buy':
     #         if funding < 0:
@@ -296,6 +308,11 @@ def get_quantity(position, side, index, wallet, quantity, funding):
     #     return quantity
     return quantity
 
+
+ind = [30, 25, 20, 15, 5, 5, 3]
+
+def get_quantity_low(position, index):
+    return (position * ind[index]) / 100
 
 
 def tri_orders(position, existing_orders, buy_orders, sell_orders):
