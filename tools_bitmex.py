@@ -309,10 +309,10 @@ def get_quantity(position, side, index, wallet, quantity, funding):
     return quantity
 
 
-ind = [30, 25, 20, 15, 5, 5, 3]
+ind = [30, 25, 20, 12, 7, 4, 2, 1]
 
 def get_quantity_low(position, index):
-    return (position * ind[index]) / 100
+    return round((position * ind[index - 1]) / 100)
 
 
 def tri_orders(position, existing_orders, buy_orders, sell_orders):
