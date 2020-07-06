@@ -309,9 +309,13 @@ def get_quantity(position, side, index, wallet, quantity, funding):
     return quantity
 
 
-ind = [30, 25, 20, 12, 7, 4, 2, 1]
+ind = [30, 25, 20, 12, 7, 4, 3, 2]
 
 def get_quantity_low(position, index):
+    if position < 0:
+        cpy = ind.copy()
+        cpy.reverse()
+        return round((position * cpy[index]) / 100) * -1
     return round((position * ind[index - 1]) / 100)
 
 
