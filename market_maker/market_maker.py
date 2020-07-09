@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from time import sleep
+from time import sleep, time
 import sys
 from datetime import datetime
 from os.path import getmtime
@@ -614,6 +614,7 @@ class OrderManager:
 
     def restart(self):
         logger.info("Restarting the market maker...")
+        time.sleep(120)
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
 #
