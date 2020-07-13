@@ -614,7 +614,7 @@ class OrderManager:
 
     def restart(self):
         logger.info("Restarting the market maker...")
-        time.sleep(120)
+        sleep(120)
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
 #
