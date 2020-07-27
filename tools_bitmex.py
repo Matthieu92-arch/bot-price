@@ -313,8 +313,8 @@ def get_quantity_low(position, index):
         cpy.reverse()
         if index > len(cpy):
             index = index -1
-        elif index < 0:
-            index = 0
+        elif index < (len(cpy) * -1):
+            index = index + 1
         return round((position * cpy[index]) / 100) * -1
     return round((position * ind[index - 1]) / 100)
 
